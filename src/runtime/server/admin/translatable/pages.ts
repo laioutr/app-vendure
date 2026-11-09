@@ -1,8 +1,9 @@
-import { idsQuery, rowsQuery } from './documents';
+import { changedItemsQuery, idsQuery, rowsQuery, rowsToWriteQuery } from './documents';
 import { SourceEntityConnectorError, SourceEntityErrorCode } from '@laioutr-core/core-types/source-entity';
 import type { VendureClient } from '../../client/VendureClient';
 import type { ListOptions, TranslatableRow } from './documents';
 import type { TranslatableKind } from './kinds';
+import { MAX_PAGE_SIZE } from '../../const';
 
 /** Where a walk stands: how many ids came before, and the last one answered. */
 interface Cursor {
@@ -37,6 +38,25 @@ export const changedSinceFilter = (since: string) => ({
   updatedAt: { after: new Date(Math.floor(new Date(since).getTime() / 1000) * 1000 - 1).toISOString() },
 });
 
+/**
+ * The condition for the entities changed since a moment, or none when it cannot be narrowed. An item
+ * (a group's option) is renamed or added without moving its parent's `updatedAt`, so the parents of
+ * the items changed since then are in too. Those are read in one request; when more items changed
+ * than one request answers, every entity is listed, which a change walk may answer.
+ */
+export const changedFilterOf = async (
+  client: VendureClient,
+  kind: TranslatableKind,
+  since: string
+): Promise<Record<string, unknown> | undefined> => {
+  const own = changedSinceFilter(since);
+  if (!kind.items) return own;
+  const { list } = await client.request(changedItemsQuery(kind.items), { options: { take: MAX_PAGE_SIZE, filter: own } });
+  if (list.totalItems > list.items.length) return undefined;
+  const parents = [...new Set(list.items.map((item) => String(item.parent)))];
+  return parents.length ? { _or: [own, { id: { in: parents } }] } : own;
+};
+
 export interface IdsPage {
   ids: string[];
   nextCursor?: string;
@@ -55,11 +75,12 @@ export const idsPage = async (
 ): Promise<IdsPage> => {
   const at = cursor ? decodeCursor(cursor) : undefined;
   const start = at ? Math.max(0, at.skip - limit) : 0;
+  const filter = changedSince ? await changedFilterOf(client, kind, changedSince) : undefined;
   const options: ListOptions = {
     skip: start,
     take: at ? at.skip - start + limit : limit,
     sort: { id: 'ASC' },
-    ...(changedSince ? { filter: changedSinceFilter(changedSince) } : {}),
+    ...(filter ? { filter } : {}),
   };
   const { list } = await client.request(idsQuery(kind), { options });
   const window = list.items.map((item) => item.id);
@@ -77,11 +98,22 @@ export const idsPage = async (
   return { ids, ...(more ? { nextCursor: encodeCursor({ skip: read, lastId }) } : {}) };
 };
 
+const byIds = (ids: readonly string[]) => ({ filter: { id: { in: [...ids] } }, take: ids.length });
+
 /** The rows `ids` names, in one request; ids Vendure does not know are left out. */
 export const rowsByIds = async (client: VendureClient, kind: TranslatableKind, ids: readonly string[]): Promise<TranslatableRow[]> => {
   if (ids.length === 0) return [];
-  const { list } = await client.request(rowsQuery(kind), { options: { filter: { id: { in: [...ids] } }, take: ids.length } });
-  return list.items;
+  return (await client.request(rowsQuery(kind), { options: byIds(ids) })).list.items;
+};
+
+/** The rows a write changes and the channel's default language now, in one request. */
+export const rowsToWrite = async (
+  client: VendureClient,
+  kind: TranslatableKind,
+  ids: readonly string[]
+): Promise<{ rows: TranslatableRow[]; defaultLanguage: string }> => {
+  const { list, channel } = await client.request(rowsToWriteQuery(kind), { options: byIds(ids) });
+  return { rows: list.items, defaultLanguage: channel.defaultLanguageCode };
 };
 
 /** Vendure answers its whole count with any page; one id is the smallest it serves. */

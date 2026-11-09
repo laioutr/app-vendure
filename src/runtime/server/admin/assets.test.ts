@@ -2,7 +2,16 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { assetsClientOf, deleteAssets, libraryItemOf, listAssets, listOptionsOf, updateAsset, uploadAssets } from './assets';
+import {
+  assetsClientOf,
+  changingAssetsClientOf,
+  deleteAssets,
+  libraryItemOf,
+  listAssets,
+  listOptionsOf,
+  updateAsset,
+  uploadAssets,
+} from './assets';
 import type { VendureContext } from '../middleware/vendureContext';
 import type { AdminAssetFieldsFragment } from '../types/vendure-admin.generated';
 import { fakeShopApi } from '../../../../test/fixtures/fakeShopApi';
@@ -26,10 +35,10 @@ const asset = (overrides: Partial<AdminAssetFieldsFragment> = {}): AdminAssetFie
   ...overrides,
 });
 
-const file = async (name: string) => {
+const file = async (name: string, mimeType = 'image/png') => {
   const filepath = join(await mkdtemp(join(tmpdir(), 'vendure-test-')), name);
   await writeFile(filepath, 'bytes');
-  return { name, mimeType: 'image/png', size: 5, filepath, getStream: () => undefined as never };
+  return { name, mimeType, size: 5, filepath, getStream: () => undefined as never };
 };
 
 describe('libraryItemOf', () => {
@@ -102,19 +111,66 @@ describe('the media library', () => {
     const api = fakeShopApi({
       AdminCreateAssets: {
         data: {
-          createAssets: [asset({ id: '9' }), { errorCode: 'MIME_TYPE_ERROR', message: 'not allowed', fileName: 'b.exe', mimeType: 'x' }],
+          createAssets: [asset({ id: '9' }), { errorCode: 'MIME_TYPE_ERROR', message: 'not allowed', fileName: 'b.tif', mimeType: 'x' }],
         },
       },
     });
-    const outcomes = await uploadAssets(admin(), [await file('a.png'), await file('b.exe')]);
+    const outcomes = await uploadAssets(admin(), [await file('a.png'), await file('b.tif', 'image/tiff')]);
     expect(outcomes).toEqual([
       { ref: '0', ok: true, item: expect.objectContaining({ externalId: '9' }) },
-      { ref: '1', ok: false, error: { code: 'unsupported_type', message: 'b.exe: not allowed' } },
+      { ref: '1', ok: false, error: { code: 'unsupported_type', message: 'b.tif: not allowed' } },
     ]);
     expect(api.calls).toHaveLength(1);
     expect(api.calls[0]!.variables).toEqual({ input: [{ file: null }, { file: null }] });
     expect(Object.keys(api.calls[0]!.files!)).toEqual(['0', '1']);
     expect(api.calls[0]!.headers['apollo-require-preflight']).toBe('true');
+  });
+
+  it('refuses more files than a batch takes, before reading any', async () => {
+    const api = fakeShopApi({});
+    const files = await Promise.all(Array.from({ length: 11 }, (_, index) => file(`${index}.png`)));
+    await expect(uploadAssets(admin(), files)).rejects.toMatchObject({ code: 'invalid_request' });
+    expect(api.calls).toHaveLength(0);
+  });
+
+  it('refuses a file of a type it does not take, an SVG, or one whose name hides another type, and sends the rest', async () => {
+    const api = fakeShopApi({ AdminCreateAssets: { data: { createAssets: [asset({ id: '9' })] } } });
+    const outcomes = await uploadAssets(admin(), [
+      await file('archive.pdf', 'application/zip'),
+      await file('logo.png', 'image/svg+xml'),
+      await file('logo.svg', 'image/png'),
+      await file('page.html', 'image/png'),
+      await file('ok.png'),
+    ]);
+    expect(outcomes.map((outcome) => (outcome.ok ? 'ok' : outcome.error.message))).toEqual([
+      expect.stringContaining('not an image'),
+      expect.stringContaining('SVG'),
+      expect.stringContaining('extension'),
+      expect.stringContaining('extension'),
+      'ok',
+    ]);
+    expect(outcomes.slice(0, 4).every((outcome) => !outcome.ok && outcome.error.code === 'unsupported_type')).toBe(true);
+    expect(outcomes[4]).toMatchObject({ ref: '4' });
+    expect(api.calls[0]!.variables).toEqual({ input: [{ file: null }] });
+    expect(Object.keys(api.calls[0]!.files!)).toEqual(['0']);
+
+    fakeShopApi({});
+    expect(await uploadAssets(admin(), [await file('a.exe', 'application/x-msdownload')])).toMatchObject([{ ok: false }]);
+  });
+
+  it('waits longer for an upload, and says its outcome is unknown when the wait runs out', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(Object.assign(new Error('aborted'), { name: 'TimeoutError' })));
+    expect(await uploadAssets(admin(), [await file('a.png')])).toEqual([
+      { ref: '0', ok: false, error: { code: 'upload_failed', message: expect.stringContaining('unknown') } },
+    ]);
+    expect(timeout).toHaveBeenCalledWith(60_000);
+  });
+
+  it('changes nothing in the shop while the storefront has no project secret', () => {
+    const context = { adminClient: admin() } as VendureContext;
+    expect(() => changingAssetsClientOf(context, false)).toThrow(expect.objectContaining({ code: 'not_enabled' }));
+    expect(changingAssetsClientOf(context, true)).toBe(context.adminClient);
   });
 
   it('fails every file of a request that fails, without throwing', async () => {

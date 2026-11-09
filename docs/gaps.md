@@ -54,21 +54,35 @@ changing the canonical types is the core owner's decision.
 - **Menus are collection trees.** Vendure has no navigation menus. `ecommerce/menu/by-alias` with `root` (or `main`)
   answers the whole collection tree; any other alias the subtree below the collection with that slug. Every entry
   links to its category.
-- **Brand** is read from a facet whose code is `brand` or `manufacturer`; Vendure has no brand field.
+- **Brand** is read from a facet whose code is `brand`; Vendure has no brand field. A manufacturer is not the brand
+  in the canonical model, so a `manufacturer` facet is not read as one.
 - **Order line ids are global.** Order items are Vendure order line ids; a line is read with its order.
 - **A product variant is resolved only through a link.** The Shop API reads no variant by id, so the
   `ProductVariant` resolver answers variants a product, cart line or order line link fetched in the same request.
 
 ## Translation and the media library (Admin API)
 
-- **No unset text in a language.** Vendure keeps a language's texts in one row with every text required, so a row
-  created for one text holds the originals in its others, and a removed translation is set back to the original. A
-  text equal to its original reads as not translated (a slug excepted, which reads as that language's address).
-  A row cannot be deleted through the Admin API.
+- **No unset text in a language.** Vendure keeps a language's texts in one row and cannot empty or delete a single
+  text of it; a row itself cannot be deleted through the Admin API. So:
+  - a write that would create a language's row is accepted only with every text the row requires — the name, and the
+    slug for products and collections — and creates the row with exactly those values, an optional description
+    empty. A write without them is refused for that entity (`invalid`) and nothing is written for it. The app never
+    fills a row with copies of the originals, which would read as translations once an original changes. A shipping
+    method's name has a database default in Vendure, but the app still requires it: a row without one shows no name.
+  - removing a description empties it; removing a name or a slug is refused for that entity (`unsupported`), as an
+    empty one is invalid.
+  - every value a row holds is reported as that language's translation, one equal to its original included.
+- **Rows filled with copies by the app's first version cannot be told apart.** Before this rule, a row created for one
+  text took the originals in its other texts. Such a copy is now reported as a translation; it reads exactly as a
+  merchant's own text. Only the local test database is known to hold them.
+- **A dropped upload's outcome is unknown.** An upload that Vendure does not answer within a minute may still be
+  stored. The media-library contract has no code for an unknown outcome, so it is answered as `upload_failed` with a
+  message saying the outcome is unknown and to look in the library before uploading again.
 - **No conditional update.** `ifVersion` is checked against a read made just before the write; a change in between
   is not caught.
 - **What changed is `updatedAt`.** A change written to the database without Vendure's services is not seen until a
-  full read.
+  full read. An option's change does not move its group's `updatedAt`, so the groups of the options changed since the
+  moment are read in one more request per page; over a hundred changed options, every group is answered.
 - **Offset paging.** The Admin API has no "after this id" filter; the cursor overlaps a page and starts after the last
   id answered, which holds while fewer than a page of entities are deleted between two pages.
 - **Asset names are not translated**: they are file names, and the storefront's alt text comes from the product or

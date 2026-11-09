@@ -49,6 +49,12 @@ describe('VendureClient', () => {
     await expect(client.request(operations.activeCustomer)).rejects.toBeInstanceOf(VendureApiError);
   });
 
+  it("reads a refusal on the Admin API as the key's, not as a lost session", async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(answer({ errors: [{ message: 'no', extensions: { code: 'FORBIDDEN' } }] })));
+    const client = new VendureClient({ apiUrl: 'https://shop.example.com/admin-api', apiKey: 'key' });
+    await expect(client.request(operations.activeCustomer)).rejects.toThrow(/Admin API key/);
+  });
+
   it('unwraps an error result of a mutation', async () => {
     vi.stubGlobal(
       'fetch',

@@ -47,7 +47,16 @@ export interface VendureFailureContext {
   confirmsWithPassword?: boolean;
   /** The input field a password policy refusal is about. */
   passwordField?: string;
+  /**
+   * The call went to the Admin API with a key, which has no session to lose: a refusal there means
+   * the key or its role, not a signed-out visitor.
+   */
+  viaApiKey?: boolean;
 }
+
+/** Vendure's own message says only that the action is not allowed, not which permission it needs. */
+const ADMIN_KEY_REFUSED =
+  "Vendure refused the Admin API key: the key is not valid, or its role lacks a permission this needs (the app's README lists them)";
 
 /** A Vendure failure no canonical error describes. Answered as a 500; the message is for the log. */
 export class VendureApiError extends Error {
@@ -134,6 +143,7 @@ export const mapVendureError = (failure: VendureFailure, context: VendureFailure
     // that is not the visitor's — a line, an address, an order — as not found or as bad input.
     case 'FORBIDDEN':
     case 'UNAUTHORIZED':
+      if (context.viaApiKey) return new VendureApiError(code, ADMIN_KEY_REFUSED);
       return context.orderCode ? new OrderNotFoundError(context.orderCode) : new UnauthenticatedError();
     case 'ENTITY_NOT_FOUND':
     case 'USER_INPUT_ERROR':

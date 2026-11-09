@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PRODUCT } from './kinds';
+import { PRODUCT, PRODUCT_OPTION_GROUP } from './kinds';
 import { changedSinceFilter, compareIds, countOf, decodeCursor, idsPage } from './pages';
 import type { FakeCall } from '../../../../../test/fixtures/fakeShopApi';
 import { fakeShopApi } from '../../../../../test/fixtures/fakeShopApi';
@@ -57,6 +57,30 @@ describe('idsPage', () => {
       filter: { updatedAt: { after: '2026-11-09T09:59:59.999Z' } },
     });
     expect(api.calls[0]!.headers['vendure-api-key']).toBe('key');
+  });
+
+  it("finds a group whose option changed, though the option's change leaves the group's moment, in one more request", async () => {
+    const api = fakeShopApi({
+      VendureChangedItems: { data: { list: { totalItems: 2, items: [{ parent: '3' }, { parent: '3' }] } } },
+      VendureTranslatables: listing(() => ['1', '3']),
+    });
+    await idsPage(admin(), PRODUCT_OPTION_GROUP, { limit: 5, changedSince: '2026-11-09T10:00:00.000Z' });
+    expect(api.operations()).toEqual(['VendureChangedItems', 'VendureTranslatables']);
+    expect(api.calls[0]!.query).toContain('productOptions(options: $options)');
+    expect(api.calls[0]!.variables!.options).toEqual({ take: 100, filter: { updatedAt: { after: '2026-11-09T09:59:59.999Z' } } });
+    expect((api.calls[1]!.variables!.options as { filter: unknown }).filter).toEqual({
+      _or: [{ updatedAt: { after: '2026-11-09T09:59:59.999Z' } }, { id: { in: ['3'] } }],
+    });
+  });
+
+  it('lists every group when more options changed than one request answers', async () => {
+    const api = fakeShopApi({
+      VendureChangedItems: { data: { list: { totalItems: 101, items: Array.from({ length: 100 }, () => ({ parent: '3' })) } } },
+      VendureTranslatables: listing(() => ['1', '3']),
+    });
+    const page = await idsPage(admin(), PRODUCT_OPTION_GROUP, { limit: 5, changedSince: '2026-11-09T10:00:00.000Z' });
+    expect(page.ids).toEqual(['1', '3']);
+    expect(api.calls[1]!.variables!.options).not.toHaveProperty('filter');
   });
 
   it('refuses a cursor it did not make', () => {

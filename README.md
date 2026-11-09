@@ -91,7 +91,8 @@ answered in the channel's default instead, and the server log says so once per s
 to the channel, or change the market, to fix it. Prices are shown with tax, in minor units.
 
 Every call to Vendure gives up after ten seconds, so a stalled server fails one request rather than holding every
-page open.
+page open. An upload to the media library waits a minute, as Vendure stores the files and renders previews before it
+answers.
 
 ### Session
 
@@ -141,7 +142,7 @@ with an API key.
    Vendure's resolvers accept either the per-entity permission or the broad one (`ReadCatalog`, `UpdateCatalog`,
    `ReadSettings`, …), so the broad ones are not needed. Nor is `ReadChannel`: the channel's languages are read
    through the Shop API. The media library needs all four asset permissions; a call the role does not
-   allow fails.
+   allow fails with a message saying the key's role lacks a permission.
 
 3. Create an API key with that role alone, and enter it with the Admin API URL in the
    environment's Configuration → Vendure.
@@ -161,19 +162,24 @@ the app.
 | `ProductOptionGroup` | name, and each option's name | — |
 | `ShippingMethod`, `PaymentMethod` | name, description (HTML) | — |
 
-- **Pages** are in id order, 50 entities at most, two requests each whatever their size. The Admin API pages by
-  offset, so the cursor keeps the last id too and the next page starts after it: entities deleted while a source is
-  read move nothing past it, up to a page of them between two pages.
+- **Pages** are in id order, 50 entities at most, two requests each whatever their size — three for products and
+  collections, whose storefront entity is read too, and for option groups listed by what changed. The Admin API
+  pages by offset, so the cursor keeps the last id too and the next page starts after it: entities deleted while a
+  source is read move nothing past it, up to a page of them between two pages.
 - **What changed** is filtered by the entity's `updatedAt`. Vendure moves it with every update made through its API
-  or dashboard — a translation written by this app included. A change written straight into the database is not
-  seen until the next full read.
+  or dashboard — a translation written by this app included. An option is renamed or added without moving its
+  group's, so the groups of the options changed since then are listed too; when more than a hundred options changed,
+  every group is listed. A change written straight into the database is not seen until the next full read.
 - **The version** is a hash of the originals, so a translation changes nothing, and a write that names an older
   version is refused. Vendure updates without a condition, so a change between the app's read and its write is not
-  caught.
-- **A language's texts are one row in Vendure.** A row created for one text takes the originals for the others —
-  what the storefront showed in that language before — and a text that equals its original is reported as not
-  translated, so it is translated later. A slug is the exception: whatever a language's row holds is its address and
-  is reported as it is. A removed translation goes back to the original, as Vendure cannot empty one text of a row.
+  caught. The channel's default language is read again with every write, and the originals are never written.
+- **A language's texts are one row in Vendure, and every value it holds is reported as that language's**, one equal
+  to its original included. A row is never filled with copies: a write that would create a language's row is taken
+  only with every text the row requires — the name, and the slug where the type has one — and the row then holds
+  exactly what was written, an optional description left empty. Otherwise the entity is refused with the reason and
+  nothing is written for it. A removed description is emptied; a name or slug cannot be removed, and such a write is
+  refused (see [docs/gaps.md](docs/gaps.md)).
+- **Private facets** and their values are never shown by the storefront, so they are skipped rather than offered.
 - Asset names are not offered for translation: Vendure names an asset after its file, and the storefront takes an
   image's alt text from the product or collection that shows it.
 
@@ -181,8 +187,15 @@ the app.
 
 Vendure's assets appear in Studio as the library "Vendure". Vendure files assets by tag, not in folders, so the
 library is flat and filters by tag. An upload goes through the storefront (Vendure has no direct upload) and takes
-images, videos, audio and PDFs, ten files at a time. A rename keeps the asset's address: Vendure keeps the file under
-its first name. An asset a product or collection still uses is not deleted; Vendure says which.
+images, videos, audio and PDFs, ten files at a time; the app refuses more files, another type, and a file whose
+extension does not match its type before anything reaches Vendure. **SVG files are refused**: Vendure stores and serves
+them as they are, scripts included, from the shop's domain. A rename keeps the asset's address: Vendure keeps the file
+under its first name. An asset a product or collection still uses is not deleted; Vendure says which.
+
+Uploading, renaming, retagging and deleting are refused while the storefront has no project secret (they are allowed
+on a dev server): without one, the storefront's media routes answer anyone, and these change the merchant's own shop.
+Listing stays open, as it shows only what the asset server serves anyway. An upload Vendure does not answer within a
+minute is reported as of unknown outcome — look for the file in the library before uploading it again.
 
 ### Product feeds
 
@@ -265,7 +278,9 @@ verification off, a customer registered through `registerCustomerAccount` can si
 
 The Admin API contract tests run with `VENDURE_CONTRACT_ADMIN_API_URL` and `VENDURE_CONTRACT_ADMIN_API_KEY` (the
 playground takes `VENDURE_ADMIN_API_URL` and `VENDURE_ADMIN_API_KEY`). They write a translation into the channel's
-second language and set it back to the original, and upload one image and delete it. The feed contract test sends a
+second language and set it back, change a product's description in the default language and set it back, create one
+product's row in Italian (which the channel does not offer; a row cannot be deleted, so it stays), and upload one
+image and delete it. The feed contract test sends a
 product feed's catalogue read to a running playground named by `VENDURE_CONTRACT_STOREFRONT_URL`.
 
 ## Open

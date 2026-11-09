@@ -1,5 +1,6 @@
 import type { SearchInput, SearchQuery } from '../types/vendure.generated';
 import type { AvailableFilter, AvailableSorting, QueryWireRequestFilter, WellKnownFilterName } from '@laioutr-core/orchestr/types';
+import { BRAND_FACET_CODE } from '../const';
 
 /**
  * The filter id of the stock filter. Vendure's default search filters on stock with `inStock` only
@@ -8,7 +9,7 @@ import type { AvailableFilter, AvailableSorting, QueryWireRequestFilter, WellKno
 export const IN_STOCK_FILTER_ID = 'in-stock';
 
 const WELL_KNOWN_FACETS: Record<string, WellKnownFilterName> = {
-  brand: 'brand',
+  [BRAND_FACET_CODE]: 'brand',
   manufacturer: 'brand',
   category: 'category',
   color: 'color',

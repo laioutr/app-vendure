@@ -8,13 +8,14 @@ import type { CanonicalRead } from './canonical';
 import type { TranslatableRow } from './documents';
 import type { TranslatableKind } from './kinds';
 import type { ConnectorSourceEntity, SourceEntityConnector, SourceEntitySkipped } from '@laioutr-core/core-types/source-entity';
+import { MAX_PAGE_SIZE } from '../../const';
 
-/** The Admin API answers a hundred rows by default; a page is half that, as each row carries every language. */
-const MAX_PAGE_SIZE = 50;
+/** Half the largest list the app reads, as each row carries every language's texts. */
+const MAX_SOURCE_PAGE_SIZE = MAX_PAGE_SIZE / 2;
 const MAX_WRITE_BATCH = 25;
 
 /** The module registers no source entity without the Admin API, so this answers only a server whose settings went missing since its build. */
-export const adminClientOf = (context: VendureContext) => {
+export const sourceEntityClientOf = (context: VendureContext) => {
   if (!context.adminClient)
     throw new SourceEntityConnectorError(SourceEntityErrorCode.unsupported, 'The Vendure Admin API URL and key are not set');
   return context.adminClient;
@@ -65,11 +66,11 @@ export const translatableEntity = (
 
   return {
     label: kind.label,
-    capabilities: { count: true, maxPageSize: MAX_PAGE_SIZE, changedSince: true, write: { maxBatchSize: MAX_WRITE_BATCH } },
+    capabilities: { count: true, maxPageSize: MAX_SOURCE_PAGE_SIZE, changedSince: true, write: { maxBatchSize: MAX_WRITE_BATCH } },
     describe: async (context) => ({ schema: kindSchema(kind), locales: channelLocales(channelOf(context)) }),
-    count: async (context) => ({ count: await countOf(adminClientOf(context), kind), exact: true }),
+    count: async (context) => ({ count: await countOf(sourceEntityClientOf(context), kind), exact: true }),
     list: async ({ cursor, limit, locales, changedSince }, context) => {
-      const client = adminClientOf(context);
+      const client = sourceEntityClientOf(context);
       const { defaultLanguageCode } = channelOf(context);
       const page = await idsPage(client, kind, { cursor, limit, changedSince });
       const { entities, skipped } = await toEntities(kind, page.ids, await rowsByIds(client, kind, page.ids), defaultLanguageCode, locales);
@@ -80,7 +81,7 @@ export const translatableEntity = (
       };
     },
     read: async ({ ids, locales }, context) => {
-      const client = adminClientOf(context);
+      const client = sourceEntityClientOf(context);
       const rows = await rowsByIds(client, kind, ids);
       const { entities, skipped } = await toEntities(kind, ids, rows, channelOf(context).defaultLanguageCode, locales);
       const found = new Set(rows.map((row) => row.id));
@@ -90,6 +91,6 @@ export const translatableEntity = (
         ...(skipped.length ? { skipped } : {}),
       };
     },
-    write: async (args, context) => writeTranslations(adminClientOf(context), kind, channelOf(context).defaultLanguageCode, args),
+    write: async (args, context) => writeTranslations(sourceEntityClientOf(context), kind, args),
   };
 };

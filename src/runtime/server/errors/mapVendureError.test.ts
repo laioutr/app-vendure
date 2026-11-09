@@ -61,6 +61,12 @@ describe('mapVendureError', () => {
     expect(map('ENTITY_NOT_FOUND')).toBeInstanceOf(VendureApiError);
   });
 
+  it("maps a refusal of an Admin API key to the key's permissions, not to a lost session", () => {
+    const error = map('FORBIDDEN', { viaApiKey: true });
+    expect(error).toBeInstanceOf(VendureApiError);
+    expect(error.message).toContain("lacks a permission");
+  });
+
   it('maps a refused order code to not found, not to a lost session', () => {
     expect(map('FORBIDDEN', { orderCode: 'C1' })).toEqual(new OrderNotFoundError('C1'));
     expect(map('ENTITY_NOT_FOUND', { orderCode: 'C1' })).toEqual(new OrderNotFoundError('C1'));

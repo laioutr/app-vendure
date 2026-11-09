@@ -4,6 +4,7 @@ import { plainTextOf } from './text';
 import { WELL_KNOWN_PRODUCT_FLAGS } from '@laioutr-core/canonical-types/entity/product';
 import type { AssetFieldsFragment, ProductFieldsFragment, VariantFieldsFragment } from '../types/vendure.generated';
 import type { MediaImage } from '@laioutr-core/core-types/common';
+import { BRAND_FACET_CODE } from '../const';
 
 type Variant = VariantFieldsFragment;
 type Product = ProductFieldsFragment;
@@ -155,11 +156,11 @@ export const productFlags = (product: Pick<Product, 'facetValues'>) => ({
 });
 
 /**
- * The brand, read from a facet whose code names one — Vendure has no brand field, and the demo's
- * and many shops' brand facet is `brand`.
+ * The brand, read from the facet whose code is `brand` — Vendure has no brand field, and the demo's
+ * and many shops' brand facet is that one. A manufacturer is not the brand in the canonical model.
  */
 export const productBrand = (product: Pick<Product, 'facetValues'>) =>
-  product.facetValues.find((value) => ['brand', 'manufacturer'].includes(value.facet.code.toLowerCase()))?.name;
+  product.facetValues.find((value) => value.facet.code.toLowerCase() === BRAND_FACET_CODE)?.name;
 
 
 /** Selected options of a variant, or of an order line's variant, which carries the same names. */

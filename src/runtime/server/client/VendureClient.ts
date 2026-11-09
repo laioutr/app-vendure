@@ -1,5 +1,5 @@
 import type { VendureDocument } from './operations';
-import { API_KEY_REQUEST_HEADER, CHANNEL_TOKEN_REQUEST_HEADER, REQUEST_TIMEOUT_MS, SESSION_TOKEN_RESPONSE_HEADER } from '../const';
+import { API_KEY_REQUEST_HEADER, CHANNEL_TOKEN_REQUEST_HEADER, REQUEST_TIMEOUT_MS, SESSION_TOKEN_RESPONSE_HEADER, UPLOAD_TIMEOUT_MS } from '../const';
 import { isErrorResult, mapVendureError, VendureApiError, type VendureFailureContext } from '../errors/mapVendureError';
 
 export interface VendureClientOptions {
@@ -38,6 +38,8 @@ export interface UploadPart {
   file: Blob;
   fileName: string;
 }
+
+const JSON_CONTENT = { 'Content-Type': 'application/json' };
 
 /** Fields of the answer whose value is a union that may be an `ErrorResult`. */
 type UnionField<TData> = Extract<keyof TData, string>;
@@ -82,7 +84,7 @@ export class VendureClient {
     variables?: TVariables,
     context?: VendureFailureContext
   ): Promise<TData> {
-    return this.answer(await this.send(JSON.stringify({ query: document, variables }), { 'Content-Type': 'application/json' }), context);
+    return this.dataOf(await this.payloadOf<TData>(JSON.stringify({ query: document, variables }), JSON_CONTENT), context);
   }
 
   /**
@@ -101,7 +103,7 @@ export class VendureClient {
     parts.forEach((part, index) => form.append(String(index), part.file, part.fileName));
     // The multipart body sets its own content type; the extra header passes the server's CSRF guard,
     // which refuses a multipart request a browser form could have sent.
-    return this.answer(await this.send(form, { 'apollo-require-preflight': 'true' }), context);
+    return this.dataOf(await this.payloadOf<TData>(form, { 'apollo-require-preflight': 'true' }, UPLOAD_TIMEOUT_MS), context);
   }
 
   /**
@@ -113,15 +115,22 @@ export class VendureClient {
     document: VendureDocument<TData, TVariables>,
     variables?: TVariables
   ): Promise<{ data: TData | null; errors: GraphQLError[] }> {
-    const response = await this.received(await this.send(JSON.stringify({ query: document, variables }), { 'Content-Type': 'application/json' }));
-    const payload = await this.parse<TData>(response);
+    const payload = await this.payloadOf<TData>(JSON.stringify({ query: document, variables }), JSON_CONTENT);
     return { data: payload.data ?? null, errors: payload.errors ?? [] };
   }
 
-  private async answer<TData>(response: Response, context: VendureFailureContext | undefined): Promise<TData> {
-    const payload = await this.parse<TData>(await this.received(response));
+  private async payloadOf<TData>(body: string | FormData, contentHeaders: Record<string, string>, timeoutMs = REQUEST_TIMEOUT_MS) {
+    return this.parse<TData>(await this.received(await this.send(body, contentHeaders, timeoutMs)));
+  }
+
+  private dataOf<TData>(payload: GraphQLResponse<TData>, context: VendureFailureContext | undefined): TData {
     const firstError = payload.errors?.[0];
-    if (firstError) throw mapVendureError({ errorCode: firstError.extensions?.code, message: firstError.message }, context);
+    if (firstError) {
+      throw mapVendureError(
+        { errorCode: firstError.extensions?.code, message: firstError.message },
+        this.options.apiKey ? { ...context, viaApiKey: true } : context
+      );
+    }
     if (!payload.data) throw new VendureApiError(undefined, 'empty GraphQL data');
 
     return payload.data;
@@ -160,17 +169,17 @@ export class VendureClient {
     return result as Exclude<TData[TField], { errorCode: unknown }>;
   }
 
-  private async send(body: string | FormData, contentHeaders: Record<string, string>): Promise<Response> {
+  private async send(body: string | FormData, contentHeaders: Record<string, string>, timeoutMs: number): Promise<Response> {
     try {
       return await fetch(this.url(), {
         method: 'POST',
         headers: { ...this.headers(), ...contentHeaders },
         body,
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (error) {
       const timedOut = error instanceof Error && error.name === 'TimeoutError';
-      throw new VendureApiError(timedOut ? 'TIMEOUT' : 'NETWORK', timedOut ? `no answer within ${REQUEST_TIMEOUT_MS} ms` : String(error));
+      throw new VendureApiError(timedOut ? 'TIMEOUT' : 'NETWORK', timedOut ? `no answer within ${timeoutMs} ms` : String(error));
     }
   }
 

@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { compareIds } from './pages';
 import type { TranslatableRow, TranslationRow } from './documents';
 import type { TextField, Translatable, TranslatableKind } from './kinds';
 import type { ConnectorSourceEntity, SourceEntityLocale, SourceEntityValues } from '@laioutr-core/core-types/source-entity';
@@ -43,26 +44,16 @@ export const channelLocales = (channel: ChannelLanguages): SourceEntityLocale[] 
 const rowOf = (translations: readonly TranslationRow[], languageCode: string) =>
   translations.find((row) => row.languageCode === languageCode);
 
-const originalsOf = (texts: Translatable, row: TranslationRow): SourceEntityValues =>
-  Object.fromEntries(texts.fields.map((field) => [field.name, row[field.name] ?? '']));
+/** The texts a row holds; an empty one is no value, in the originals and in a translation alike. */
+const valuesOf = (texts: Translatable, row: TranslationRow | undefined): SourceEntityValues =>
+  Object.fromEntries(texts.fields.flatMap((field) => (row?.[field.name] ? [[field.name, row[field.name]!]] : [])));
 
 /**
- * The values a language's row holds as its own. Vendure keeps a language's texts in one row, so a row
- * created for one text holds copies of the originals in its other fields; a copy is no translation,
- * and is answered as missing so it gets translated. A slug is the exception: whatever a row holds is
- * that language's address, kept as it is.
+ * Items in id order: Vendure loads a group's options without an order, and the originals' order goes
+ * into the version, which must not change unless an original does.
  */
-const translatedOf = (texts: Translatable, row: TranslationRow | undefined, originals: SourceEntityValues): SourceEntityValues => {
-  if (!row) return {};
-  return Object.fromEntries(
-    texts.fields.flatMap((field) => {
-      const value = row[field.name];
-      if (!value) return [];
-      if (field.kind !== 'slug' && value === originals[field.name]) return [];
-      return [[field.name, value]];
-    })
-  );
-};
+const inIdOrder = <TItem extends { id: string }>(items: readonly TItem[] | undefined): TItem[] =>
+  [...(items ?? [])].sort((a, b) => compareIds(a.id, b.id));
 
 const isEmpty = (values: SourceEntityValues) => Object.keys(values).length === 0;
 
@@ -76,11 +67,11 @@ export const versionOf = async (data: SourceEntityValues): Promise<string> => {
 export const originalsOfRow = (kind: TranslatableKind, row: TranslatableRow, defaultLanguage: string) => {
   const own = rowOf(row.translations, defaultLanguage);
   if (!own) return undefined;
-  const data = originalsOf(kind, own);
+  const data = valuesOf(kind, own);
   if (kind.items) {
-    data[kind.items.key] = (row.items ?? []).flatMap((item) => {
+    data[kind.items.key] = inIdOrder(row.items).flatMap((item) => {
       const itemOwn = rowOf(item.translations, defaultLanguage);
-      return itemOwn ? [{ id: item.id, ...originalsOf(kind.items!, itemOwn) }] : [];
+      return itemOwn ? [{ id: item.id, ...valuesOf(kind.items!, itemOwn) }] : [];
     });
   }
   return data;
@@ -92,16 +83,18 @@ export const entityOfRow = async (
   row: TranslatableRow,
   languages: { defaultLanguage: string; locales: readonly string[] }
 ): Promise<ConnectorSourceEntity | { skipped: string }> => {
+  const hidden = kind.hidden?.of(row);
+  if (hidden) return { skipped: hidden };
   const data = originalsOfRow(kind, row, languages.defaultLanguage);
   if (!data) return { skipped: `The ${kind.noun} has no text in the channel's default language "${languages.defaultLanguage}"` };
 
   const translations = Object.fromEntries(
     languages.locales.map((locale) => {
-      const values = translatedOf(kind, rowOf(row.translations, locale), data);
+      const values = valuesOf(kind, rowOf(row.translations, locale));
       if (kind.items) {
-        const items = (row.items ?? []).flatMap((item) => {
-          const original = (data[kind.items!.key] as SourceEntityValues[]).find((candidate) => candidate.id === item.id);
-          const translated = original ? translatedOf(kind.items!, rowOf(item.translations, locale), original) : {};
+        const originals = new Set((data[kind.items.key] as SourceEntityValues[]).map((item) => item.id));
+        const items = inIdOrder(row.items).flatMap((item) => {
+          const translated = originals.has(item.id) ? valuesOf(kind.items!, rowOf(item.translations, locale)) : {};
           return isEmpty(translated) ? [] : [{ id: item.id, ...translated }];
         });
         if (items.length) values[kind.items.key] = items;

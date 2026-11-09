@@ -24,7 +24,11 @@ export const SESSION_COOKIE = 'vendure-auth-token';
 /** A year, like Vendure's own `rememberMe` session. Vendure decides when the session itself expires. */
 export const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-/** Vendure's default `shopListQueryLimit`; a larger `take` is refused. */
+/**
+ * The largest `take` the app sends: Vendure's default `shopListQueryLimit`, above which the Shop API
+ * refuses a list. The Admin API's default limit (`adminListQueryLimit`) is a thousand, so the same cap
+ * holds for every Admin API list too.
+ */
 export const MAX_PAGE_SIZE = 100;
 
 /** The slug Vendure gives the hidden root of the collection tree. */
@@ -37,6 +41,13 @@ export const ROOT_COLLECTION_SLUG = '__root_collection__';
  */
 export const REQUEST_TIMEOUT_MS = 10_000;
 
+/**
+ * How long an upload may take. It carries up to a batch of files through the storefront, and Vendure
+ * stores each and renders an image's preview before it answers, which a video or a slow link can
+ * stretch well past a call's ten seconds. A minute still ends inside a serverless function's limit.
+ */
+export const UPLOAD_TIMEOUT_MS = 60_000;
+
 /** The storefront's own http-only cookie listing the orders this browser placed, signed. */
 export const PLACED_ORDERS_COOKIE = 'vendure-placed-orders';
 
@@ -48,3 +59,6 @@ export const PLACED_ORDERS_COOKIE_MAX_AGE = 60 * 60 * 24;
 
 /** Only the latest few placed orders are remembered, so the cookie stays small. */
 export const PLACED_ORDERS_KEPT = 5;
+
+/** The code of the facet the brand is read from; Vendure has no brand field. */
+export const BRAND_FACET_CODE = 'brand';
