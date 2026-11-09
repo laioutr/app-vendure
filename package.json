@@ -1,0 +1,101 @@
+{
+  "name": "@laioutr/app-vendure",
+  "version": "0.1.0",
+  "description": "Vendure connector app for Laioutr: products, collections, search, cart, customer accounts and orders through Vendure's Shop API.",
+  "repository": "github:laioutr/app-vendure",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "laioutr",
+    "vendure",
+    "nuxt",
+    "ecommerce",
+    "headless"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    }
+  },
+  "main": "./dist/module.mjs",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types.d.mts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "LICENSE",
+    "laioutr.manifest.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "pnpm run dev:prepare && nuxi dev playground",
+    "dev:build": "nuxi build playground",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
+    "build": "nuxt-module-build build",
+    "prepack": "nuxt-module-build build",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:contract": "vitest run --config vitest.contract.config.ts",
+    "typecheck": "vue-tsc --noEmit && vue-tsc --noEmit -p src/runtime/server/tsconfig.json",
+    "graphql:codegen": "graphql-codegen --config codegen.ts"
+  },
+  "dependencies": {
+    "@ebec/http": "^2.3.0",
+    "@laioutr-core/kit": "^0.82.0",
+    "@nuxt/kit": "^3.16.2",
+    "defu": "6.1.4",
+    "ufo": "^1.5.4",
+    "zod": "3.25.61"
+  },
+  "peerDependencies": {
+    "@laioutr-core/canonical-types": ">=0.43.1 <1.0.0",
+    "@laioutr-core/core-types": ">=0.82.0 <1.0.0",
+    "@laioutr-core/frontend-core": ">=0.82.0 <1.0.0",
+    "@laioutr-core/orchestr": ">=0.82.0 <1.0.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/typescript": "^5.0.0",
+    "@graphql-codegen/typescript-operations": "^5.0.0",
+    "@laioutr-core/canonical-types": "0.43.1",
+    "@laioutr-core/core-types": "0.82.0",
+    "@laioutr-core/devtools": "0.82.0",
+    "@laioutr-core/frontend-core": "0.82.0",
+    "@laioutr-core/orchestr": "0.82.0",
+    "@laioutr/eslint-config": "^1.9.5",
+    "@laioutr/prettier-config": "^1.1.0",
+    "@nuxt/image": "1.9.0",
+    "@nuxt/module-builder": "^1.0.1",
+    "@nuxt/schema": "3.16.2",
+    "@nuxt/test-utils": "^3.19.1",
+    "@types/node": "22.15.32",
+    "@vue/test-utils": "^2.5.1",
+    "eslint": "^9.35.0",
+    "graphql": "16.11.0",
+    "h3": "1.15.3",
+    "happy-dom": "^17.6.3",
+    "nuxt": "3.16.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.7.2",
+    "vitest": "3.1.1",
+    "vue-tsc": "^2.1.10"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@10.11.1"
+}

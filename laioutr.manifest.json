@@ -1,0 +1,57 @@
+{
+  "configSettings": {
+    "placement": "environment",
+    "menu": {
+      "label": "Vendure",
+      "icon": "LuShoppingBag"
+    },
+    "sections": [
+      {
+        "label": "Shop API",
+        "description": "The Vendure server this environment reads products, collections, carts, customers and orders from, through its public Shop API.",
+        "fields": [
+          {
+            "name": "shopApiUrl",
+            "type": "text",
+            "label": "Shop API URL",
+            "description": "The full address of the Shop API endpoint. Without it, the storefront cannot reach the shop.",
+            "placeholder": "https://shop.example.com/shop-api",
+            "required": true
+          },
+          {
+            "name": "channelToken",
+            "type": "secret",
+            "label": "Channel token",
+            "description": "Selects a channel of a multi-channel Vendure server; sent as the vendure-token header. Leave empty for the default channel."
+          },
+          {
+            "name": "languageCode",
+            "type": "text",
+            "label": "Language override",
+            "description": "A Vendure language code sent with every request, e.g. en. When empty, the visitor's language is sent.",
+            "placeholder": "en"
+          }
+        ]
+      },
+      {
+        "label": "Admin API",
+        "description": "Optional. With both fields, the shop's texts can be translated with Translatr and its assets appear in Studio's media library. Without them, the storefront works as before and neither is offered.",
+        "fields": [
+          {
+            "name": "adminApiUrl",
+            "type": "text",
+            "label": "Admin API URL",
+            "description": "The full address of the Admin API endpoint (Vendure 3.6 or later).",
+            "placeholder": "https://shop.example.com/admin-api"
+          },
+          {
+            "name": "adminApiKey",
+            "type": "secret",
+            "label": "Admin API key",
+            "description": "An API key of a role holding only the permissions the app's README lists. Sent as the vendure-api-key header."
+          }
+        ]
+      }
+    ]
+  }
+}
