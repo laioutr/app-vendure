@@ -1,4 +1,3 @@
- 
 import type { RuntimeConfigModulePrivate, RuntimeConfigModulePublic } from './module';
 
 declare module '@nuxt/schema' {

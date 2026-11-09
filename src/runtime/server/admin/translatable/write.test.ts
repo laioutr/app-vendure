@@ -16,7 +16,10 @@ const chair: TranslatableRow = {
     { languageCode: 'de', name: 'Stuhl', slug: 'stuhl', description: '<p>Bequem</p>' },
   ],
 };
-const table: TranslatableRow = { id: '2', translations: [{ languageCode: 'en', name: 'Table', slug: 'table', description: '<p>Sturdy</p>' }] };
+const table: TranslatableRow = {
+  id: '2',
+  translations: [{ languageCode: 'en', name: 'Table', slug: 'table', description: '<p>Sturdy</p>' }],
+};
 const chairData = { name: 'Chair', slug: 'chair', description: '<p>Comfortable</p>' };
 
 const set = (index: number, path: (string | [string, string])[], value: string, locale = 'de') => ({

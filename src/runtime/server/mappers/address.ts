@@ -33,7 +33,10 @@ export const splitFullName = (fullName: string | null | undefined): { firstName:
 export const joinFullName = (address: Partial<Pick<MailingAddressValue, 'firstName' | 'lastName'>>) =>
   [address.firstName, address.lastName].filter(Boolean).join(' ');
 
-type VendureAddress = Pick<OrderAddressFieldsFragment, 'fullName' | 'company' | 'streetLine1' | 'streetLine2' | 'city' | 'province' | 'postalCode' | 'phoneNumber'> & {
+type VendureAddress = Pick<
+  OrderAddressFieldsFragment,
+  'fullName' | 'company' | 'streetLine1' | 'streetLine2' | 'city' | 'province' | 'postalCode' | 'phoneNumber'
+> & {
   countryCode?: string | null;
 };
 
@@ -81,8 +84,8 @@ export const toPartialAddress = (address: VendureAddress | null | undefined): Pa
 
 export const toAddressBookEntry = (address: AddressFieldsFragment) => {
   const mailing = toMailingAddress({ ...address, countryCode: address.country.code });
-  return mailing
-    ? {
+  return mailing ?
+      {
         id: address.id,
         address: mailing,
         isDefaultShipping: !!address.defaultShippingAddress,
@@ -119,12 +122,23 @@ const UPDATE_FIELDS = {
  * Only the fields the caller sent. A name sent half is completed from the stored address, since
  * Vendure keeps one `fullName`.
  */
-export const toUpdateAddressInput = (id: string, update: Partial<MailingAddressValue>, stored: AddressFieldsFragment | undefined): UpdateAddressInput => {
+export const toUpdateAddressInput = (
+  id: string,
+  update: Partial<MailingAddressValue>,
+  stored: AddressFieldsFragment | undefined
+): UpdateAddressInput => {
   const storedName = splitFullName(stored?.fullName);
   const nameChanged = update.firstName !== undefined || update.lastName !== undefined;
   const input: UpdateAddressInput = { id };
-  if (nameChanged) input.fullName = joinFullName({ firstName: update.firstName ?? storedName.firstName, lastName: update.lastName ?? storedName.lastName });
-  for (const [field, vendureField] of Object.entries(UPDATE_FIELDS) as [keyof typeof UPDATE_FIELDS, (typeof UPDATE_FIELDS)[keyof typeof UPDATE_FIELDS]][]) {
+  if (nameChanged)
+    input.fullName = joinFullName({
+      firstName: update.firstName ?? storedName.firstName,
+      lastName: update.lastName ?? storedName.lastName,
+    });
+  for (const [field, vendureField] of Object.entries(UPDATE_FIELDS) as [
+    keyof typeof UPDATE_FIELDS,
+    (typeof UPDATE_FIELDS)[keyof typeof UPDATE_FIELDS],
+  ][]) {
     const value = update[field];
     if (value !== undefined) input[vendureField] = value;
   }

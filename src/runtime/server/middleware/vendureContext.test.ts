@@ -3,11 +3,20 @@ import { vendureContext } from './vendureContext';
 import { fakeShopApi } from '../../../../test/fixtures/fakeShopApi';
 
 let server = 0;
-const settings = (overrides: { languageCode?: string } = {}) => ({ shopApiUrl: `https://context${++server}.example.com/shop-api`, ...overrides });
+const settings = (overrides: { languageCode?: string } = {}) => ({
+  shopApiUrl: `https://context${++server}.example.com/shop-api`,
+  ...overrides,
+});
 
 const channelAnswer = {
   data: {
-    activeChannel: { code: 'default', defaultLanguageCode: 'en', availableLanguageCodes: ['en', 'de', 'pt_BR'], defaultCurrencyCode: 'USD', availableCurrencyCodes: ['USD', 'EUR'] },
+    activeChannel: {
+      code: 'default',
+      defaultLanguageCode: 'en',
+      availableLanguageCodes: ['en', 'de', 'pt_BR'],
+      defaultCurrencyCode: 'USD',
+      availableCurrencyCodes: ['USD', 'EUR'],
+    },
   },
 };
 
@@ -26,8 +35,12 @@ describe('vendureContext', () => {
     vi.restoreAllMocks();
   });
 
-  it('asks in the visitor\'s language and the market\'s currency when the channel offers them', async () => {
-    const api = fakeShopApi({ ActiveChannel: channelAnswer, InStockSearchProbe: { data: { search: { totalItems: 1 } } }, ActiveOrder: { data: { activeOrder: null } } });
+  it("asks in the visitor's language and the market's currency when the channel offers them", async () => {
+    const api = fakeShopApi({
+      ActiveChannel: channelAnswer,
+      InStockSearchProbe: { data: { search: { totalItems: 1 } } },
+      ActiveOrder: { data: { activeOrder: null } },
+    });
     const context = await vendureContext(settings(), request({ sessionToken: 'visitor' }));
     expect(context).toMatchObject({ currencyCode: 'EUR', searchesByStock: true });
 
@@ -36,7 +49,7 @@ describe('vendureContext', () => {
     expect(api.calls.at(-1)!.headers.Authorization).toBe('Bearer visitor');
   });
 
-  it('falls back to the channel\'s default currency and language, warning once per server and market', async () => {
+  it("falls back to the channel's default currency and language, warning once per server and market", async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     fakeShopApi({ ActiveChannel: channelAnswer, InStockSearchProbe: { data: { search: { totalItems: 1 } } } });
     const shop = settings();
@@ -52,7 +65,11 @@ describe('vendureContext', () => {
 
   it('sends a configured language only when the channel offers it', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const api = fakeShopApi({ ActiveChannel: channelAnswer, InStockSearchProbe: { data: { search: { totalItems: 1 } } }, ActiveOrder: { data: { activeOrder: null } } });
+    const api = fakeShopApi({
+      ActiveChannel: channelAnswer,
+      InStockSearchProbe: { data: { search: { totalItems: 1 } } },
+      ActiveOrder: { data: { activeOrder: null } },
+    });
     const { operations } = await import('../client/operations');
 
     await (await vendureContext(settings({ languageCode: 'pt_BR' }), request())).vendureClient.request(operations.activeOrder);
@@ -61,8 +78,12 @@ describe('vendureContext', () => {
     expect(searchedWith(api).get('languageCode')).toBe('en');
   });
 
-  it('reads the catalog without the visitor\'s session', async () => {
-    const api = fakeShopApi({ ActiveChannel: channelAnswer, InStockSearchProbe: { data: { search: { totalItems: 1 } } }, ProductBySlug: { data: { product: null } } });
+  it("reads the catalog without the visitor's session", async () => {
+    const api = fakeShopApi({
+      ActiveChannel: channelAnswer,
+      InStockSearchProbe: { data: { search: { totalItems: 1 } } },
+      ProductBySlug: { data: { product: null } },
+    });
     const { operations } = await import('../client/operations');
     const onSessionToken = vi.fn();
     const context = await vendureContext(settings(), request({ sessionToken: 'visitor', onSessionToken }));
@@ -73,7 +94,11 @@ describe('vendureContext', () => {
 
   it('serves without a channel, sending no language or currency and offering no stock filter', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const api = fakeShopApi({ ActiveChannel: { status: 503 }, InStockSearchProbe: { status: 503 }, ActiveOrder: { data: { activeOrder: null } } });
+    const api = fakeShopApi({
+      ActiveChannel: { status: 503 },
+      InStockSearchProbe: { status: 503 },
+      ActiveOrder: { data: { activeOrder: null } },
+    });
     const context = await vendureContext(settings(), request());
     expect(context).toMatchObject({ currencyCode: 'EUR', searchesByStock: false });
     await context.vendureClient.request((await import('../client/operations')).operations.activeOrder);

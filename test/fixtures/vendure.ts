@@ -1,4 +1,10 @@
-import type { AssetFieldsFragment, OrderFieldsFragment, OrderLineFieldsFragment, ProductFieldsFragment, VariantFieldsFragment } from '../../src/runtime/server/types/vendure.generated';
+import type {
+  AssetFieldsFragment,
+  OrderFieldsFragment,
+  OrderLineFieldsFragment,
+  ProductFieldsFragment,
+  VariantFieldsFragment,
+} from '../../src/runtime/server/types/vendure.generated';
 
 export const asset = (overrides: Partial<AssetFieldsFragment> = {}): AssetFieldsFragment => ({
   id: 'a1',
@@ -42,16 +48,56 @@ export const product = (overrides: Partial<ProductFieldsFragment> = {}): Product
   featuredAsset: asset({ id: 'a2' }),
   assets: [asset({ id: 'a1' }), asset({ id: 'a2' }), asset({ id: 'a3', type: 'BINARY' })],
   optionGroups: [
-    { id: 'g1', code: 'laptop-screen-size', name: 'screen size', options: [{ id: 'o13', code: '13-inch', name: '13 inch' }, { id: 'o15', code: '15-inch', name: '15 inch' }] },
-    { id: 'g2', code: 'laptop-ram', name: 'RAM', options: [{ id: 'o8', code: '8gb', name: '8GB' }, { id: 'o16', code: '16gb', name: '16GB' }] },
+    {
+      id: 'g1',
+      code: 'laptop-screen-size',
+      name: 'screen size',
+      options: [
+        { id: 'o13', code: '13-inch', name: '13 inch' },
+        { id: 'o15', code: '15-inch', name: '15 inch' },
+      ],
+    },
+    {
+      id: 'g2',
+      code: 'laptop-ram',
+      name: 'RAM',
+      options: [
+        { id: 'o8', code: '8gb', name: '8GB' },
+        { id: 'o16', code: '16gb', name: '16GB' },
+      ],
+    },
   ],
   variants: [
     variant({ id: 'v1', stockLevel: 'OUT_OF_STOCK', priceWithTax: 1190 }),
-    variant({ id: 'v2', sku: 'L-15-8', priceWithTax: 1390, options: [{ id: 'o15', code: '15-inch', name: '15 inch', group: SIZE }, { id: 'o8', code: '8gb', name: '8GB', group: RAM }] }),
-    variant({ id: 'v3', sku: 'L-13-16', priceWithTax: 1490, options: [{ id: 'o13', code: '13-inch', name: '13 inch', group: SIZE }, { id: 'o16', code: '16gb', name: '16GB', group: RAM }] }),
+    variant({
+      id: 'v2',
+      sku: 'L-15-8',
+      priceWithTax: 1390,
+      options: [
+        { id: 'o15', code: '15-inch', name: '15 inch', group: SIZE },
+        { id: 'o8', code: '8gb', name: '8GB', group: RAM },
+      ],
+    }),
+    variant({
+      id: 'v3',
+      sku: 'L-13-16',
+      priceWithTax: 1490,
+      options: [
+        { id: 'o13', code: '13-inch', name: '13 inch', group: SIZE },
+        { id: 'o16', code: '16gb', name: '16GB', group: RAM },
+      ],
+    }),
   ],
   collections: [
-    { id: 'c2', name: 'Electronics', slug: 'electronics', breadcrumbs: [{ id: 'c1', name: '__root_collection__', slug: '__root_collection__' }, { id: 'c2', name: 'Electronics', slug: 'electronics' }] },
+    {
+      id: 'c2',
+      name: 'Electronics',
+      slug: 'electronics',
+      breadcrumbs: [
+        { id: 'c1', name: '__root_collection__', slug: '__root_collection__' },
+        { id: 'c2', name: 'Electronics', slug: 'electronics' },
+      ],
+    },
     {
       id: 'c3',
       name: 'Computers',

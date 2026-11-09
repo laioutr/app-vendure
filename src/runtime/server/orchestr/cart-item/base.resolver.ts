@@ -17,7 +17,8 @@ export default defineVendureComponentResolver({
       const coupon = couponCodeOfItemId(id);
       const line = lines.get(id);
       const isCoupon = !!coupon && order.couponCodes.includes(coupon);
-      const components = isCoupon ? cartCouponComponents(coupon!, order.currencyCode) : line && cartLineComponents(line, order.currencyCode);
+      const components =
+        isCoupon ? cartCouponComponents(coupon!, order.currencyCode) : line && cartLineComponents(line, order.currencyCode);
       if (!components) return [];
       return [
         $entity({

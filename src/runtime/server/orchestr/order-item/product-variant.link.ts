@@ -16,6 +16,8 @@ export default defineVendureLink(OrderItemProductVariantLink, async ({ entityIds
 
   // A variant deleted since the order was placed has no link.
   return {
-    links: wanted.flatMap(({ line }) => (known.has(line.productVariant.id) ? [{ sourceId: line.id, targetId: line.productVariant.id }] : [])),
+    links: wanted.flatMap(({ line }) =>
+      known.has(line.productVariant.id) ? [{ sourceId: line.id, targetId: line.productVariant.id }] : []
+    ),
   };
 });

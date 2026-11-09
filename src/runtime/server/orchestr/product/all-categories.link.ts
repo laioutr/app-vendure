@@ -14,7 +14,9 @@ export default defineVendureLink({
       links: entityIds.flatMap((id) => {
         const product = known.get(id);
         if (!product) return [];
-        const targetIds = product.collections.filter((collection) => collection.slug !== ROOT_COLLECTION_SLUG).map((collection) => collection.id);
+        const targetIds = product.collections
+          .filter((collection) => collection.slug !== ROOT_COLLECTION_SLUG)
+          .map((collection) => collection.id);
         return [{ sourceId: id, targetIds, entityTotal: targetIds.length }];
       }),
     };

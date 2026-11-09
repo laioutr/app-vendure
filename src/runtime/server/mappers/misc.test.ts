@@ -32,10 +32,12 @@ describe('statistics', () => {
   });
 
   it('reports no total for a month in two currencies', () => {
-    expect(monthlyStatistics([
-      { orderPlacedAt: '2026-01-05T00:00:00Z', totalWithTax: 100, currencyCode: 'EUR' },
-      { orderPlacedAt: '2026-01-06T00:00:00Z', totalWithTax: 100, currencyCode: 'USD' },
-    ])[0]).toEqual({ month: 1, orderCount: 2, orderTotal: undefined });
+    expect(
+      monthlyStatistics([
+        { orderPlacedAt: '2026-01-05T00:00:00Z', totalWithTax: 100, currencyCode: 'EUR' },
+        { orderPlacedAt: '2026-01-06T00:00:00Z', totalWithTax: 100, currencyCode: 'USD' },
+      ])[0]
+    ).toEqual({ month: 1, orderCount: 2, orderTotal: undefined });
   });
 });
 

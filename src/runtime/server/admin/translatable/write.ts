@@ -52,8 +52,7 @@ interface PlannedUpdate extends TranslationUpdate {
 
 type Planned = { target: Target; operation: IndexedSourceEntityOperation };
 
-const listOf = (names: readonly string[]) =>
-  names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+const listOf = (names: readonly string[]) => (names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`);
 
 /**
  * The row one language of one Vendure entity gets, or why nothing may be written for the entity.
@@ -136,9 +135,9 @@ const planUpdates = (entityId: string, noun: string, targets: readonly Planned[]
 const isForbidden = (error: GraphQLError | undefined) => error?.extensions?.code === 'FORBIDDEN';
 
 const failureOf = (error: GraphQLError | undefined, noun: string): SourceEntityError => {
-  if (isForbidden(error))
-    return sourceEntityError(SourceEntityErrorCode.readOnly, `The Admin API key's role may not update this ${noun}`);
-  if (error?.extensions?.code === 'ENTITY_NOT_FOUND') return sourceEntityError(SourceEntityErrorCode.notFound, `Vendure has no such ${noun} any more`);
+  if (isForbidden(error)) return sourceEntityError(SourceEntityErrorCode.readOnly, `The Admin API key's role may not update this ${noun}`);
+  if (error?.extensions?.code === 'ENTITY_NOT_FOUND')
+    return sourceEntityError(SourceEntityErrorCode.notFound, `Vendure has no such ${noun} any more`);
   return sourceEntityError(SourceEntityErrorCode.failed, error?.message ?? 'Vendure did not answer the update');
 };
 
@@ -232,7 +231,10 @@ export const writeTranslations = async (
       if (operation.locale === undefined || operation.locale === defaultLanguage) {
         failed.push({
           index: operation.index,
-          error: sourceEntityError(SourceEntityErrorCode.readOnly, `"${defaultLanguage}" is the channel's default language, which holds the originals`),
+          error: sourceEntityError(
+            SourceEntityErrorCode.readOnly,
+            `"${defaultLanguage}" is the channel's default language, which holds the originals`
+          ),
         });
         return [];
       }

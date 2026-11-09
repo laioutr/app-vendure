@@ -12,7 +12,10 @@ export const getCheckoutState = async (client: VendureClient, fallbackCurrency: 
   return checkoutState(await client.request(operations.checkoutState), fallbackCurrency);
 };
 
-export const setCustomer = async (client: VendureClient, customer: { email: string; firstName: string; lastName: string; phone?: string }) => {
+export const setCustomer = async (
+  client: VendureClient,
+  customer: { email: string; firstName: string; lastName: string; phone?: string }
+) => {
   await client.mutate(
     operations.setCustomerForOrder,
     { input: { emailAddress: customer.email, firstName: customer.firstName, lastName: customer.lastName, phoneNumber: customer.phone } },

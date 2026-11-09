@@ -7,7 +7,9 @@ const notSupported = (reasonLabel: string) => ({ status: 'rejected' as const, re
 /** Product rows go to Vendure in one batch, then coupons, which apply to what the cart then holds. */
 export default defineVendureAction(CartAddItemsAction, async ({ context, input }) => {
   const products = input.flatMap((row, index) =>
-    row.type === 'product' && !row.subscription ? [{ index, row: { productId: row.productId, variantId: row.variantId, quantity: row.quantity } }] : []
+    row.type === 'product' && !row.subscription ?
+      [{ index, row: { productId: row.productId, variantId: row.variantId, quantity: row.quantity } }]
+    : []
   );
   const added = await addVariants(
     context.vendureClient,

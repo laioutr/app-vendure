@@ -162,7 +162,6 @@ export const productFlags = (product: Pick<Product, 'facetValues'>) => ({
 export const productBrand = (product: Pick<Product, 'facetValues'>) =>
   product.facetValues.find((value) => value.facet.code.toLowerCase() === BRAND_FACET_CODE)?.name;
 
-
 /** Selected options of a variant, or of an order line's variant, which carries the same names. */
 export const variantOptions = (variant: { options: readonly { name: string; group: { code: string; name: string } }[] }) =>
   variant.options.map((option) => ({ name: option.group.name, value: option.name, wellKnownName: wellKnownOptionName(option.group) }));

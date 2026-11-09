@@ -94,7 +94,9 @@ describe('VendureClient', () => {
   });
 
   it('authenticates an Admin API key and keeps no session, whatever the server sends', async () => {
-    const fetch = vi.fn(async (_url: string, _init: RequestInit) => answer({ data: { activeOrder: null } }, { 'vendure-auth-token': 'issued' }));
+    const fetch = vi.fn(async (_url: string, _init: RequestInit) =>
+      answer({ data: { activeOrder: null } }, { 'vendure-auth-token': 'issued' })
+    );
     vi.stubGlobal('fetch', fetch);
     const client = new VendureClient({ apiUrl: 'https://shop.example.com/admin-api', apiKey: 'secret', channelToken: 'ch' });
     await client.request(operations.activeOrder);

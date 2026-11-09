@@ -65,9 +65,14 @@ export const addedRows = (
 
     const error = errors.shift();
     if (quantity > 0) return { item: { status: 'added' as const, ...row, quantity }, message: quantityAdjustedMessage() };
-    return { item: rejectedRow(row, error ? batchRejectionReasonOf(mapVendureError(error, { variantId: row.variantId })) : 'not-orderable') };
+    return {
+      item: rejectedRow(row, error ? batchRejectionReasonOf(mapVendureError(error, { variantId: row.variantId })) : 'not-orderable'),
+    };
   });
 
-  if (errors.length) console.warn(`[vendure] ${errors.length} error(s) of an add to cart matched no row: ${errors.map((error) => error.errorCode).join(', ')}`);
+  if (errors.length)
+    console.warn(
+      `[vendure] ${errors.length} error(s) of an add to cart matched no row: ${errors.map((error) => error.errorCode).join(', ')}`
+    );
   return outcomes;
 };

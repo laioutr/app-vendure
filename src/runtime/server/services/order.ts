@@ -16,7 +16,9 @@ type OrderListOptions = NonNullable<CustomerOrdersQueryVariables['options']>;
 /** One page of the signed-in customer's orders; a visitor who is not signed in has none to read. */
 const ordersPage = async (client: VendureClient, options: OrderListOptions) => {
   if (!client.hasSession) throw new UnauthenticatedError();
-  const { activeCustomer } = await client.request(operations.customerOrders, { options: { ...options, take: Math.min(options.take ?? MAX_PAGE_SIZE, MAX_PAGE_SIZE) } });
+  const { activeCustomer } = await client.request(operations.customerOrders, {
+    options: { ...options, take: Math.min(options.take ?? MAX_PAGE_SIZE, MAX_PAGE_SIZE) },
+  });
   if (!activeCustomer) throw new UnauthenticatedError();
   return activeCustomer.orders;
 };
@@ -46,7 +48,11 @@ export const orderOfCustomer = async (client: VendureClient, orderId: string) =>
  */
 export const variantEntriesOfLines = async (client: VendureClient, orders: readonly OrderFieldsFragment[]): Promise<VariantEntry[]> => {
   const lines = orders.flatMap((order) => order.lines);
-  const products = await productsKnownOrFetched(client, [], lines.map((line) => line.productVariant.productId));
+  const products = await productsKnownOrFetched(
+    client,
+    [],
+    lines.map((line) => line.productVariant.productId)
+  );
   return [...products.values()].flatMap((product) => product.variants.map((variant) => ({ variant, product })));
 };
 

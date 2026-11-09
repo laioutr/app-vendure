@@ -32,7 +32,14 @@ export const fakeShopApi = (handlers: Record<string, Handler>) => {
     const body = JSON.parse(String(form ? form.get('operations') : init.body)) as { query: string; variables?: Record<string, unknown> };
     const operation = OPERATION_NAME.exec(body.query)?.[1] ?? 'anonymous';
     const files = form && Object.fromEntries([...form.entries()].filter((entry): entry is [string, File] => entry[1] instanceof File));
-    const call = { operation, query: body.query, variables: body.variables, url, headers: init.headers as Record<string, string>, ...(files ? { files } : {}) };
+    const call = {
+      operation,
+      query: body.query,
+      variables: body.variables,
+      url,
+      headers: init.headers as Record<string, string>,
+      ...(files ? { files } : {}),
+    };
     calls.push(call);
     const handler = handlers[operation];
     if (!handler) throw new Error(`fakeShopApi: no answer for ${operation}`);
@@ -46,4 +53,6 @@ export const fakeShopApi = (handlers: Record<string, Handler>) => {
   return { calls, fetch, operations: () => calls.map((call) => call.operation) };
 };
 
-export const forbidden = { errors: [{ message: 'You are not currently authorized to perform this action', extensions: { code: 'FORBIDDEN' } }] };
+export const forbidden = {
+  errors: [{ message: 'You are not currently authorized to perform this action', extensions: { code: 'FORBIDDEN' } }],
+};

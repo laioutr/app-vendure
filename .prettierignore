@@ -1,0 +1,7 @@
+# Written by tools; formatting them only adds noise to the next regeneration.
+pnpm-lock.yaml
+docs/research/*.graphql
+src/runtime/server/types/*.generated.ts
+dist
+.nuxt
+.output

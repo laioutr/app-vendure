@@ -9,7 +9,10 @@ export const monthlyStatistics = (orders: readonly { orderPlacedAt: string | nul
     const entry = months.get(month) ?? { month, orderCount: 0, orderTotal: { amount: 0, currency: order.currencyCode } };
     entry.orderCount += 1;
     // Orders in another currency cannot be summed into one amount, so the month reports no total.
-    entry.orderTotal = entry.orderTotal && entry.orderTotal.currency === order.currencyCode ? { ...entry.orderTotal, amount: entry.orderTotal.amount + order.totalWithTax } : undefined;
+    entry.orderTotal =
+      entry.orderTotal && entry.orderTotal.currency === order.currencyCode ?
+        { ...entry.orderTotal, amount: entry.orderTotal.amount + order.totalWithTax }
+      : undefined;
     months.set(month, entry);
   }
   return [...months.values()].sort((a, b) => a.month - b.month);

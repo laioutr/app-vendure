@@ -31,12 +31,15 @@ describe('catalog against the Shop API', () => {
     const { channel } = await channelOf(SHOP_API_URL, undefined);
     const currency = channel.availableCurrencyCodes.at(-1)!;
     const language = channel.availableLanguageCodes?.at(-1) ?? channel.defaultLanguageCode;
-    const context = await vendureContext({ shopApiUrl: SHOP_API_URL }, { market: { slug: 'contract', currency }, localeChain: [language], onSessionToken: () => {} });
+    const context = await vendureContext(
+      { shopApiUrl: SHOP_API_URL },
+      { market: { slug: 'contract', currency }, localeChain: [language], onSessionToken: () => {} }
+    );
     const product = await productBySlug(context.catalogClient, 'laptop');
     expect(product?.variants[0]?.currencyCode).toBe(currency);
   });
 
-  it('falls back to the channel\'s defaults for a currency and language it does not offer', async () => {
+  it("falls back to the channel's defaults for a currency and language it does not offer", async () => {
     const { channel } = await channelOf(SHOP_API_URL, undefined);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const context = await vendureContext(
@@ -53,7 +56,11 @@ describe('catalog against the Shop API', () => {
   it('lists a collection with facets, filters and sorting', async () => {
     const client = visitor().client();
     const { searchesByStock } = await channelOf(SHOP_API_URL, undefined);
-    const all = await productListing(client, { collectionSlug: 'electronics' }, { pagination: { offset: 0, limit: 5 }, sorting: 'price-asc', searchesByStock });
+    const all = await productListing(
+      client,
+      { collectionSlug: 'electronics' },
+      { pagination: { offset: 0, limit: 5 }, sorting: 'price-asc', searchesByStock }
+    );
     expect(all.availableFilters.some((filter) => filter.id === 'in-stock')).toBe(searchesByStock);
     expect(all.ids.length).toBe(5);
     expect(all.total).toBeGreaterThan(5);
@@ -61,13 +68,21 @@ describe('catalog against the Shop API', () => {
     expect(list).toBeDefined();
 
     const valueId = list!.type === 'list' ? list!.values[0]!.id : '';
-    const filtered = await productListing(client, { collectionSlug: 'electronics' }, { pagination: { offset: 0, limit: 50 }, filter: { [list!.id]: [valueId], 'in-stock': true }, searchesByStock });
+    const filtered = await productListing(
+      client,
+      { collectionSlug: 'electronics' },
+      { pagination: { offset: 0, limit: 50 }, filter: { [list!.id]: [valueId], 'in-stock': true }, searchesByStock }
+    );
     expect(filtered.total).toBeLessThanOrEqual(all.total);
     expect(filtered.total).toBeGreaterThan(0);
   });
 
   it('lists without the stock filter on a search that cannot filter on stock', async () => {
-    const listing = await productListing(visitor().client(), { term: 'camera' }, { pagination: { offset: 0, limit: 3 }, filter: { 'in-stock': true }, searchesByStock: false });
+    const listing = await productListing(
+      visitor().client(),
+      { term: 'camera' },
+      { pagination: { offset: 0, limit: 3 }, filter: { 'in-stock': true }, searchesByStock: false }
+    );
     expect(listing.total).toBeGreaterThan(0);
     expect(listing.availableFilters.some((filter) => filter.id === 'in-stock')).toBe(false);
   });

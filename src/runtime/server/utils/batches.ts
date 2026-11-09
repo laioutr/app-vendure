@@ -7,7 +7,9 @@ import { MAX_PAGE_SIZE } from '../const';
 export const inPages = <TPage>(ids: readonly string[], fetchPage: (batch: string[]) => Promise<TPage>): Promise<TPage[]> => {
   const unique = [...new Set(ids)];
   return Promise.all(
-    Array.from({ length: Math.ceil(unique.length / MAX_PAGE_SIZE) }, (_, index) => fetchPage(unique.slice(index * MAX_PAGE_SIZE, (index + 1) * MAX_PAGE_SIZE)))
+    Array.from({ length: Math.ceil(unique.length / MAX_PAGE_SIZE) }, (_, index) =>
+      fetchPage(unique.slice(index * MAX_PAGE_SIZE, (index + 1) * MAX_PAGE_SIZE))
+    )
   );
 };
 

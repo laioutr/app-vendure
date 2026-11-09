@@ -39,7 +39,11 @@ export const updateCustomer = async (
  * Vendure confirms a new address by email when the shop requires verification and changes it at once
  * otherwise; the result does not say which, so the address is read back.
  */
-export const changeEmail = async (client: VendureClient, email: string, currentPassword: string): Promise<'changed' | 'pending-confirmation'> => {
+export const changeEmail = async (
+  client: VendureClient,
+  email: string,
+  currentPassword: string
+): Promise<'changed' | 'pending-confirmation'> => {
   await activeCustomerOf(client);
   await client.mutate(
     operations.requestUpdateCustomerEmailAddress,

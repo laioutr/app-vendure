@@ -14,7 +14,14 @@ import {
 } from '../../src/runtime/server/services/checkout';
 import { VendureOrderError } from '../../src/runtime/shared/errors';
 
-const address = { firstName: 'Contract', lastName: 'Test', address1: 'Teststrasse 1', city: 'Berlin', postalCode: '10115', countryCode: 'DE' };
+const address = {
+  firstName: 'Contract',
+  lastName: 'Test',
+  address1: 'Teststrasse 1',
+  city: 'Berlin',
+  postalCode: '10115',
+  countryCode: 'DE',
+};
 
 describe('guest checkout against the Shop API', () => {
   it('places an order step by step and reads it back by its code', async () => {

@@ -12,7 +12,11 @@ export default defineVendureLink({
     const listings = await Promise.all(
       entityIds.map(async (collectionId) => ({
         collectionId,
-        listing: await productListing(context.catalogClient, { collectionId }, { pagination: page, sorting, filter, searchesByStock: context.searchesByStock }),
+        listing: await productListing(
+          context.catalogClient,
+          { collectionId },
+          { pagination: page, sorting, filter, searchesByStock: context.searchesByStock }
+        ),
       }))
     );
 

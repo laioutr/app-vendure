@@ -307,7 +307,6 @@ export const SearchItemFields = /* GraphQL */ `
   }
 `;
 
-
 export const ActiveChannelQuery = /* GraphQL */ `
   query ActiveChannel {
     activeChannel {
@@ -319,7 +318,6 @@ export const ActiveChannelQuery = /* GraphQL */ `
     }
   }
 `;
-
 
 /**
  * `SearchInput.inStock` exists only where the DefaultSearchPlugin indexes stock
@@ -413,7 +411,6 @@ export const CollectionsQuery = /* GraphQL */ `
   }
 `;
 
-
 export const ActiveOrderQuery = /* GraphQL */ `
   query ActiveOrder {
     activeOrder {
@@ -497,7 +494,6 @@ export const RemoveCouponCodeMutation = /* GraphQL */ `
     }
   }
 `;
-
 
 export const CheckoutStateQuery = /* GraphQL */ `
   query CheckoutState {
@@ -607,7 +603,6 @@ export const OrderByCodeQuery = /* GraphQL */ `
   }
 `;
 
-
 export const LoginMutation = /* GraphQL */ `
   mutation Login($username: String!, $password: String!) {
     login(username: $username, password: $password, rememberMe: true) {
@@ -660,7 +655,6 @@ export const ResetPasswordMutation = /* GraphQL */ `
     }
   }
 `;
-
 
 export const ActiveCustomerQuery = /* GraphQL */ `
   query ActiveCustomer {
@@ -728,7 +722,6 @@ export const DeleteCustomerAddressMutation = /* GraphQL */ `
     }
   }
 `;
-
 
 export const CustomerOrdersQuery = /* GraphQL */ `
   query CustomerOrders($options: OrderListOptions) {

@@ -9,7 +9,10 @@ export default defineVendureLink(CartItemProductVariantLink, async ({ entityIds,
   const order = await activeOrderFor(context.vendureClient, passthrough);
   if (!order) return { links: [] };
 
-  passthrough.set(variantsToken, [...(passthrough.get(variantsToken) ?? []), ...(await variantEntriesOfLines(context.catalogClient, [order]))]);
+  passthrough.set(variantsToken, [
+    ...(passthrough.get(variantsToken) ?? []),
+    ...(await variantEntriesOfLines(context.catalogClient, [order])),
+  ]);
   const lines = new Map(order.lines.map((line) => [line.id, line]));
 
   return {

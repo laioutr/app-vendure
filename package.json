@@ -2,10 +2,6 @@
   "name": "@laioutr/app-vendure",
   "version": "0.1.0",
   "description": "Vendure connector app for Laioutr: products, collections, search, cart, customer accounts and orders through Vendure's Shop API.",
-  "repository": "github:laioutr/app-vendure",
-  "license": "MIT",
-  "type": "module",
-  "sideEffects": false,
   "keywords": [
     "laioutr",
     "vendure",
@@ -13,6 +9,10 @@
     "ecommerce",
     "headless"
   ],
+  "repository": "github:laioutr/app-vendure",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/types.d.mts",
@@ -37,21 +37,18 @@
     "LICENSE",
     "laioutr.manifest.json"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
+    "build": "nuxt-module-build build",
     "dev": "pnpm run dev:prepare && nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "build": "nuxt-module-build build",
-    "prepack": "nuxt-module-build build",
+    "graphql:codegen": "graphql-codegen --config codegen.ts",
     "lint": "eslint .",
+    "prepack": "nuxt-module-build build",
     "test": "vitest run",
-    "test:watch": "vitest watch",
     "test:contract": "vitest run --config vitest.contract.config.ts",
-    "typecheck": "vue-tsc --noEmit && vue-tsc --noEmit -p src/runtime/server/tsconfig.json",
-    "graphql:codegen": "graphql-codegen --config codegen.ts"
+    "test:watch": "vitest watch",
+    "typecheck": "vue-tsc --noEmit && vue-tsc --noEmit -p src/runtime/server/tsconfig.json"
   },
   "dependencies": {
     "@ebec/http": "^2.3.0",
@@ -60,12 +57,6 @@
     "defu": "6.1.4",
     "ufo": "^1.5.4",
     "zod": "3.25.61"
-  },
-  "peerDependencies": {
-    "@laioutr-core/canonical-types": ">=0.43.1 <1.0.0",
-    "@laioutr-core/core-types": ">=0.82.0 <1.0.0",
-    "@laioutr-core/frontend-core": ">=0.82.0 <1.0.0",
-    "@laioutr-core/orchestr": ">=0.82.0 <1.0.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.7",
@@ -94,8 +85,17 @@
     "vitest": "3.1.1",
     "vue-tsc": "^2.1.10"
   },
+  "peerDependencies": {
+    "@laioutr-core/canonical-types": ">=0.43.1 <1.0.0",
+    "@laioutr-core/core-types": ">=0.82.0 <1.0.0",
+    "@laioutr-core/frontend-core": ">=0.82.0 <1.0.0",
+    "@laioutr-core/orchestr": ">=0.82.0 <1.0.0"
+  },
+  "packageManager": "pnpm@10.11.1",
   "engines": {
     "node": ">=22.12.0"
   },
-  "packageManager": "pnpm@10.11.1"
+  "publishConfig": {
+    "access": "public"
+  }
 }

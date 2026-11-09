@@ -8,7 +8,8 @@ import { PLACED_ORDERS_KEPT } from '../const';
  */
 const SEPARATOR = '~';
 
-const signatureOf = (secret: string, codes: string) => createHmac('sha256', secret).update(`vendure-placed-orders:${codes}`).digest('base64url');
+const signatureOf = (secret: string, codes: string) =>
+  createHmac('sha256', secret).update(`vendure-placed-orders:${codes}`).digest('base64url');
 
 /** The codes a cookie value carries, or none when it is missing, malformed or not signed with `secret`. */
 export const readPlacedOrders = (value: string | undefined, secret: string): string[] => {

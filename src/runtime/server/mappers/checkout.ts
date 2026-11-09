@@ -9,8 +9,9 @@ export const checkoutOrder = (order: OrderFieldsFragment) => {
     id: order.id,
     code: order.code,
     state: order.state,
-    customer: order.customer
-      ? { email: order.customer.emailAddress, firstName: order.customer.firstName, lastName: order.customer.lastName }
+    customer:
+      order.customer ?
+        { email: order.customer.emailAddress, firstName: order.customer.firstName, lastName: order.customer.lastName }
       : undefined,
     shippingAddress: toPartialAddress(order.shippingAddress),
     billingAddress: toPartialAddress(order.billingAddress),

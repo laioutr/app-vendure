@@ -5,7 +5,8 @@ import { MAX_PAGE_SIZE, ROOT_COLLECTION_SLUG } from '../const';
 import { flattenCollectionTree } from '../mappers/collection';
 import { inPages, knownOrFetched } from '../utils/batches';
 
-export const productBySlug = async (client: VendureClient, slug: string) => (await client.request(operations.productBySlug, { slug })).product;
+export const productBySlug = async (client: VendureClient, slug: string) =>
+  (await client.request(operations.productBySlug, { slug })).product;
 
 /** Products by id, in the order asked, one request per hundred; ids Vendure does not know are left out. */
 export const productsByIds = async (client: VendureClient, ids: readonly string[]): Promise<ProductFieldsFragment[]> => {
@@ -22,12 +23,17 @@ export const collectionBySlug = async (client: VendureClient, slug: string) =>
   (await client.request(operations.collectionBySlug, { slug })).collection;
 
 export const collectionsByIds = async (client: VendureClient, ids: readonly string[]): Promise<CollectionFieldsFragment[]> =>
-  (await inPages(ids, (batch) => client.request(operations.collections, { options: { filter: { id: { in: batch } }, take: batch.length } }))).flatMap(
-    (page) => page.collections.items
-  );
+  (
+    await inPages(ids, (batch) =>
+      client.request(operations.collections, { options: { filter: { id: { in: batch } }, take: batch.length } })
+    )
+  ).flatMap((page) => page.collections.items);
 
 /** One page of collections, the whole tree when `topLevelOnly` is not set. */
-export const collectionsPage = async (client: VendureClient, options: { skip: number; take: number; topLevelOnly?: boolean; term?: string }) => {
+export const collectionsPage = async (
+  client: VendureClient,
+  options: { skip: number; take: number; topLevelOnly?: boolean; term?: string }
+) => {
   const { collections } = await client.request(operations.collections, {
     options: {
       skip: options.skip,
@@ -65,20 +71,27 @@ export const ROOT_MENU_ALIASES = new Set(['root', 'main', 'main-menu', ROOT_COLL
  */
 export const menuBelow = async (client: VendureClient, alias: string): Promise<MenuEntry[] | undefined> => {
   const collections = await allCollections(client);
-  const rootId = ROOT_MENU_ALIASES.has(alias)
-    ? collections.find((collection) => collection.breadcrumbs.length === 2)?.parentId
+  const rootId =
+    ROOT_MENU_ALIASES.has(alias) ?
+      collections.find((collection) => collection.breadcrumbs.length === 2)?.parentId
     : collections.find((collection) => collection.slug === alias)?.id;
   if (!rootId) return undefined;
   return flattenCollectionTree(collections, rootId);
 };
 
 /** The products `ids` names, taking those a query already fetched (`known`) and reading the rest in one batch. */
-export const productsKnownOrFetched = (client: VendureClient, known: readonly ProductFieldsFragment[] | undefined, ids: readonly string[]) =>
-  knownOrFetched(known, ids, (missing) => productsByIds(client, missing));
+export const productsKnownOrFetched = (
+  client: VendureClient,
+  known: readonly ProductFieldsFragment[] | undefined,
+  ids: readonly string[]
+) => knownOrFetched(known, ids, (missing) => productsByIds(client, missing));
 
 /** The same for collections. */
-export const collectionsKnownOrFetched = (client: VendureClient, known: readonly CollectionFieldsFragment[] | undefined, ids: readonly string[]) =>
-  knownOrFetched(known, ids, (missing) => collectionsByIds(client, missing));
+export const collectionsKnownOrFetched = (
+  client: VendureClient,
+  known: readonly CollectionFieldsFragment[] | undefined,
+  ids: readonly string[]
+) => knownOrFetched(known, ids, (missing) => collectionsByIds(client, missing));
 
 /** Collections a Studio picker offers for a typed term; the root collection is never offered. */
 export const collectionChoices = async (client: VendureClient, term: string | undefined) =>

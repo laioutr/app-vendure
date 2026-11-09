@@ -30,7 +30,18 @@ describe('address', () => {
   it('maps a stored address to an address book entry', () => {
     expect(toAddressBookEntry(stored)).toEqual({
       id: 'a1',
-      address: { firstName: 'Ada', lastName: 'Byron Lovelace', company: undefined, phone: '+442079460000', address1: 'Main St 1', address2: undefined, city: 'London', postalCode: 'N1', countryCode: 'GB', provinceCode: undefined },
+      address: {
+        firstName: 'Ada',
+        lastName: 'Byron Lovelace',
+        company: undefined,
+        phone: '+442079460000',
+        address1: 'Main St 1',
+        address2: undefined,
+        city: 'London',
+        postalCode: 'N1',
+        countryCode: 'GB',
+        provinceCode: undefined,
+      },
       isDefaultShipping: true,
       isDefaultBilling: false,
     });
@@ -42,7 +53,16 @@ describe('address', () => {
   });
 
   it('writes a canonical address as Vendure input', () => {
-    expect(toCreateAddressInput({ firstName: 'Ada', lastName: 'Lovelace', address1: 'Main St 1', city: 'London', postalCode: 'N1', countryCode: 'GB' })).toEqual({
+    expect(
+      toCreateAddressInput({
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        address1: 'Main St 1',
+        city: 'London',
+        postalCode: 'N1',
+        countryCode: 'GB',
+      })
+    ).toEqual({
       fullName: 'Ada Lovelace',
       company: undefined,
       streetLine1: 'Main St 1',

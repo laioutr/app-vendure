@@ -25,6 +25,9 @@ export default defineVendurePageIndex({
       const skip = offsetOfCursor(cursor);
       const page = await collectionsPage(context.catalogClient, { skip, take: batchSize });
       const next = skip + page.items.length;
-      return { entries: page.items.map(collectionPageEntry), nextCursor: page.items.length && next < page.totalItems ? String(next) : undefined };
+      return {
+        entries: page.items.map(collectionPageEntry),
+        nextCursor: page.items.length && next < page.totalItems ? String(next) : undefined,
+      };
     }, startCursor),
 });

@@ -39,7 +39,6 @@ const lineLink = (line: Line) => ({
   reference: { type: 'Product' as const, slug: line.productVariant.product.slug, id: line.productVariant.product.id },
 });
 
-
 /** The cart's item ids: its lines, then its coupon codes. */
 export const cartItemIds = (order: Pick<Order, 'lines' | 'couponCodes'>) => [
   ...order.lines.map((line) => line.id),
@@ -94,7 +93,6 @@ export const cartCouponComponents = (code: string, currency: string) => ({
   availability: { status: 'inStock' as const, quantity: 1 },
   quantityRule: { min: 1, max: 1, increment: 1, canChange: false },
 });
-
 
 /**
  * Vendure order states (the default process) onto the canonical status. Fulfilment is reported as

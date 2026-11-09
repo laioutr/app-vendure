@@ -49,7 +49,10 @@ interface RequestedLocale {
 export const requestLocale = (server: string, channel: ChannelLocales, asked: RequestedLocale) => {
   const languages = channel.availableLanguageCodes?.length ? channel.availableLanguageCodes : [channel.defaultLanguageCode];
 
-  let languageCode = asked.configuredLanguage ? vendureLanguageCode([asked.configuredLanguage], languages) : vendureLanguageCode(asked.localeChain, languages);
+  let languageCode =
+    asked.configuredLanguage ?
+      vendureLanguageCode([asked.configuredLanguage], languages)
+    : vendureLanguageCode(asked.localeChain, languages);
   if (!languageCode) {
     const wanted = asked.configuredLanguage ?? asked.localeChain[0] ?? 'none';
     warnOnce(

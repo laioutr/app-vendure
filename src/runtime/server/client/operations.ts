@@ -41,7 +41,8 @@ export const withFragments = fragmentLibrary(D);
 const withAdminFragments = fragmentLibrary(A);
 
 const op = <TData, TVariables = Record<string, never>>(source: string) => withFragments(source) as VendureDocument<TData, TVariables>;
-const adminOp = <TData, TVariables = Record<string, never>>(source: string) => withAdminFragments(source) as VendureDocument<TData, TVariables>;
+const adminOp = <TData, TVariables = Record<string, never>>(source: string) =>
+  withAdminFragments(source) as VendureDocument<TData, TVariables>;
 
 export const operations = {
   activeChannel: op<T.ActiveChannelQuery>(D.ActiveChannelQuery),

@@ -24,12 +24,18 @@ const map = (errorCode: string, context = {}, extra = {}) => mapVendureError({ e
 
 describe('mapVendureError', () => {
   it('maps cart failures with the variant, line or code they are about', () => {
-    expect(map('INSUFFICIENT_STOCK_ERROR', { variantId: 'v1' }, { quantityAvailable: 0 })).toEqual(new ProductStockError('v1', 'OUT_OF_STOCK'));
-    expect((map('INSUFFICIENT_STOCK_ERROR', { variantId: 'v1' }, { quantityAvailable: 2 }) as ProductStockError).data.reason).toBe('NOT_ENOUGH_STOCK');
+    expect(map('INSUFFICIENT_STOCK_ERROR', { variantId: 'v1' }, { quantityAvailable: 0 })).toEqual(
+      new ProductStockError('v1', 'OUT_OF_STOCK')
+    );
+    expect((map('INSUFFICIENT_STOCK_ERROR', { variantId: 'v1' }, { quantityAvailable: 2 }) as ProductStockError).data.reason).toBe(
+      'NOT_ENOUGH_STOCK'
+    );
     expect(map('NEGATIVE_QUANTITY_ERROR', { variantId: 'v1' })).toBeInstanceOf(ProductQuantityError);
     expect((map('ORDER_LIMIT_ERROR', { variantId: 'v1' }) as ProductQuantityError).data.reason).toBe('MAXIMUM_EXCEEDED');
     expect(map('COUPON_CODE_INVALID_ERROR', { couponCode: 'X' })).toEqual(new DiscountCodeNotFoundError('X'));
-    expect((map('COUPON_CODE_EXPIRED_ERROR', { couponCode: 'X' }) as DiscountCodeNotRedeemableError).data.reason).toBe('CURRENTLY_INACTIVE');
+    expect((map('COUPON_CODE_EXPIRED_ERROR', { couponCode: 'X' }) as DiscountCodeNotRedeemableError).data.reason).toBe(
+      'CURRENTLY_INACTIVE'
+    );
     expect((map('COUPON_CODE_LIMIT_ERROR', { couponCode: 'X' }) as DiscountCodeNotRedeemableError).data.reason).toBe('USAGE_LIMIT_REACHED');
   });
 
@@ -45,7 +51,9 @@ describe('mapVendureError', () => {
     expect(map('INVALID_CREDENTIALS_ERROR', { confirmsWithPassword: true })).toBeInstanceOf(CurrentPasswordInvalidError);
     expect(map('NOT_VERIFIED_ERROR')).toBeInstanceOf(CustomerNotConfirmedError);
     expect(map('EMAIL_ADDRESS_CONFLICT_ERROR')).toBeInstanceOf(EmailAlreadyInUseError);
-    expect(map('PASSWORD_VALIDATION_ERROR', { passwordField: 'newPassword' })).toEqual(new InvalidFieldError('INVALID_VALUE', ['newPassword']));
+    expect(map('PASSWORD_VALIDATION_ERROR', { passwordField: 'newPassword' })).toEqual(
+      new InvalidFieldError('INVALID_VALUE', ['newPassword'])
+    );
     expect(map('MISSING_PASSWORD_ERROR')).toEqual(new InvalidFieldError('MISSING', ['password']));
     expect((map('PASSWORD_RESET_TOKEN_EXPIRED_ERROR') as PasswordResetTokenInvalidError).data.reason).toBe('expired');
     expect(map('VERIFICATION_TOKEN_INVALID_ERROR')).toBeInstanceOf(EmailConfirmationTokenInvalidError);
@@ -64,7 +72,7 @@ describe('mapVendureError', () => {
   it("maps a refusal of an Admin API key to the key's permissions, not to a lost session", () => {
     const error = map('FORBIDDEN', { viaApiKey: true });
     expect(error).toBeInstanceOf(VendureApiError);
-    expect(error.message).toContain("lacks a permission");
+    expect(error.message).toContain('lacks a permission');
   });
 
   it('maps a refused order code to not found, not to a lost session', () => {

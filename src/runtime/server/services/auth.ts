@@ -1,4 +1,9 @@
-import { EmailAlreadyInUseError, EmailConfirmationTokenInvalidError, InvalidCredentialsError, PasswordResetTokenInvalidError } from '@laioutr-core/canonical-types/ecommerce';
+import {
+  EmailAlreadyInUseError,
+  EmailConfirmationTokenInvalidError,
+  InvalidCredentialsError,
+  PasswordResetTokenInvalidError,
+} from '@laioutr-core/canonical-types/ecommerce';
 import type { VendureClient } from '../client/VendureClient';
 import { operations } from '../client/operations';
 import { isEmailChangeLink, tokenFromLink } from '../mappers/authLinks';
@@ -75,5 +80,7 @@ export const requestPasswordReset = async (client: VendureClient, email: string)
 export const resetPassword = async (client: VendureClient, link: string, newPassword: string) => {
   const token = tokenFromLink(link);
   if (!token) throw new PasswordResetTokenInvalidError('invalid');
-  await client.withoutSession().mutate(operations.resetPassword, { token, password: newPassword }, 'resetPassword', { passwordField: 'newPassword' });
+  await client
+    .withoutSession()
+    .mutate(operations.resetPassword, { token, password: newPassword }, 'resetPassword', { passwordField: 'newPassword' });
 };

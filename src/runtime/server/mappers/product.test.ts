@@ -33,11 +33,22 @@ describe('variantAvailability', () => {
 describe('product', () => {
   it('defaults to the first variant in stock', () => {
     expect(defaultVariantOf(product())?.id).toBe('v2');
-    expect(productDefaultVariant(product())).toEqual({ origin: 'derived', id: 'v2', sku: 'L-15-8', options: ['15 inch', '8GB'], status: 'inStock' });
+    expect(productDefaultVariant(product())).toEqual({
+      origin: 'derived',
+      id: 'v2',
+      sku: 'L-15-8',
+      options: ['15 inch', '8GB'],
+      status: 'inStock',
+    });
   });
 
   it('prices from the cheapest variant with tax, starting from when they differ', () => {
-    expect(productPrices(product(), 'USD')).toEqual({ price: { amount: 1190, currency: 'EUR' }, taxIncluded: true, isOnSale: false, isStartingFrom: true });
+    expect(productPrices(product(), 'USD')).toEqual({
+      price: { amount: 1190, currency: 'EUR' },
+      taxIncluded: true,
+      isOnSale: false,
+      isStartingFrom: true,
+    });
     expect(productPrices(product({ variants: [variant()] }), 'USD').isStartingFrom).toBe(false);
   });
 
@@ -67,7 +78,7 @@ describe('product', () => {
     ]);
   });
 
-  it('names well-known option groups by code, name or the code\'s last word', () => {
+  it("names well-known option groups by code, name or the code's last word", () => {
     expect(wellKnownOptionName({ code: 'shirt-colour', name: 'Shade' })).toBe('color');
     expect(wellKnownOptionName({ code: 'x', name: 'Size' })).toBe('size');
     expect(wellKnownOptionName({ code: 'laptop-ram', name: 'RAM' })).toBeUndefined();
@@ -87,7 +98,12 @@ describe('product', () => {
         { id: 'f3', code: 'eco', name: 'Eco', facet: { id: 'ff', code: 'Flags', name: 'Flags' } },
       ],
     });
-    expect(productFlags(flagged)).toEqual({ flags: [{ name: 'Neu', wellKnownName: 'new' }, { name: 'Eco', wellKnownName: undefined }] });
+    expect(productFlags(flagged)).toEqual({
+      flags: [
+        { name: 'Neu', wellKnownName: 'new' },
+        { name: 'Eco', wellKnownName: undefined },
+      ],
+    });
   });
 
   it('picks the deepest collection for the trail', () => {
@@ -100,7 +116,7 @@ describe('product', () => {
     expect(shortDescriptionOf('<p></p>')).toBeUndefined();
   });
 
-  it('lists a variant\'s options with their group names', () => {
+  it("lists a variant's options with their group names", () => {
     expect(variantOptions(variant())).toEqual([
       { name: 'screen size', value: '13 inch', wellKnownName: 'size' },
       { name: 'RAM', value: '8GB', wellKnownName: undefined },
@@ -114,7 +130,7 @@ describe('productComponents and variantComponents', () => {
     expect(productComponents(product({ facetValues: [] }), 'USD').brand()).toEqual({ name: undefined });
   });
 
-  it('gives a variant without an image of its own the product\'s', () => {
+  it("gives a variant without an image of its own the product's", () => {
     const own = productComponents(product(), 'USD');
     expect(own.base()).toEqual({ name: product().name, slug: product().slug });
     const bare = variant({ featuredAsset: null });

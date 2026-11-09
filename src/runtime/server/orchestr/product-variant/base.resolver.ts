@@ -17,7 +17,14 @@ import { defineVendureComponentResolver } from '../../middleware/defineVendure';
 export default defineVendureComponentResolver({
   entityType: 'ProductVariant',
   label: 'Vendure Product Variant Resolver',
-  provides: [ProductVariantBase, ProductVariantInfo, ProductVariantAvailability, ProductVariantPrices, ProductVariantOptions, ProductVariantQuantityRule],
+  provides: [
+    ProductVariantBase,
+    ProductVariantInfo,
+    ProductVariantAvailability,
+    ProductVariantPrices,
+    ProductVariantOptions,
+    ProductVariantQuantityRule,
+  ],
   cache: false,
   resolve: ({ entityIds, passthrough, $entity }) => {
     const byId = new Map((passthrough.get(variantsToken) ?? []).map((entry) => [entry.variant.id, entry]));

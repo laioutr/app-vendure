@@ -1,6 +1,11 @@
 import { createPassthroughToken } from '#imports';
 import type { MenuEntry } from '../services/catalog';
-import type { CollectionFieldsFragment, OrderFieldsFragment, ProductFieldsFragment, VariantFieldsFragment } from '../types/vendure.generated';
+import type {
+  CollectionFieldsFragment,
+  OrderFieldsFragment,
+  ProductFieldsFragment,
+  VariantFieldsFragment,
+} from '../types/vendure.generated';
 import type { PassthroughToken } from '@laioutr-core/orchestr/types';
 
 // Each token is cast: `createPassthroughToken` comes from `#imports`, which the declaration builder

@@ -1,4 +1,12 @@
-import { OrderAddresses, OrderBase, OrderBuyer, OrderCost, OrderDeliveries, OrderPayments, OrderState } from '@laioutr-core/canonical-types/entity/order';
+import {
+  OrderAddresses,
+  OrderBase,
+  OrderBuyer,
+  OrderCost,
+  OrderDeliveries,
+  OrderPayments,
+  OrderState,
+} from '@laioutr-core/canonical-types/entity/order';
 import { orderComponents } from '../../mappers/order';
 import { defineVendureComponentResolver } from '../../middleware/defineVendure';
 import { ordersFor } from '../../utils/orders';

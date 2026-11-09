@@ -5,5 +5,8 @@ import { collectionChoices } from '../../services/catalog';
 export default defineVendureQueryTemplateProvider({
   for: CategoryByIdQuery,
   run: async ({ input, context }) =>
-    (await collectionChoices(context.catalogClient, input.term)).map((collection) => ({ input: { id: collection.id }, label: collection.name })),
+    (await collectionChoices(context.catalogClient, input.term)).map((collection) => ({
+      input: { id: collection.id },
+      label: collection.name,
+    })),
 });

@@ -37,17 +37,17 @@ export const mapFacetsToFilters = (facetValues: readonly FacetValueResult[], sea
   }
 
   return [
-    ...[...byFacet].map(
-      ([code, facet]): AvailableFilter => ({
-        type: 'list',
-        id: code,
-        label: facet.label,
-        wellKnownName: WELL_KNOWN_FACETS[code.toLowerCase()],
-        presentation: 'text',
-        values: facet.values,
-      })
-    ),
-    ...(searchesByStock ? [{ type: 'boolean', id: IN_STOCK_FILTER_ID, label: 'In stock', wellKnownName: 'in-stock' } satisfies AvailableFilter] : []),
+    ...[...byFacet].map(([code, facet]): AvailableFilter => ({
+      type: 'list',
+      id: code,
+      label: facet.label,
+      wellKnownName: WELL_KNOWN_FACETS[code.toLowerCase()],
+      presentation: 'text',
+      values: facet.values,
+    })),
+    ...(searchesByStock ?
+      [{ type: 'boolean', id: IN_STOCK_FILTER_ID, label: 'In stock', wellKnownName: 'in-stock' } satisfies AvailableFilter]
+    : []),
   ];
 };
 

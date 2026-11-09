@@ -70,6 +70,8 @@ export const vendureContext = async (settings: VendureSettings | undefined, requ
 };
 
 const adminClientOf = (settings: VendureSettings, channelToken: string | undefined) =>
-  settings.adminApiUrl && settings.adminApiKey ? new VendureClient({ apiUrl: settings.adminApiUrl, apiKey: settings.adminApiKey, channelToken }) : undefined;
+  settings.adminApiUrl && settings.adminApiKey ?
+    new VendureClient({ apiUrl: settings.adminApiUrl, apiKey: settings.adminApiKey, channelToken })
+  : undefined;
 
 export type VendureContext = Awaited<ReturnType<typeof vendureContext>>;

@@ -1,5 +1,11 @@
 import type { VendureDocument } from './operations';
-import { API_KEY_REQUEST_HEADER, CHANNEL_TOKEN_REQUEST_HEADER, REQUEST_TIMEOUT_MS, SESSION_TOKEN_RESPONSE_HEADER, UPLOAD_TIMEOUT_MS } from '../const';
+import {
+  API_KEY_REQUEST_HEADER,
+  CHANNEL_TOKEN_REQUEST_HEADER,
+  REQUEST_TIMEOUT_MS,
+  SESSION_TOKEN_RESPONSE_HEADER,
+  UPLOAD_TIMEOUT_MS,
+} from '../const';
 import { isErrorResult, mapVendureError, VendureApiError, type VendureFailureContext } from '../errors/mapVendureError';
 
 export interface VendureClientOptions {

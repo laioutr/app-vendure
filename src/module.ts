@@ -72,7 +72,10 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     await registerLaioutrApp({
       name,
       version,
-      orchestrDirs: [resolveRuntimeModule('server/orchestr'), ...(hasAdminApi ? [resolveRuntimeModule('server/admin/source-entities')] : [])],
+      orchestrDirs: [
+        resolveRuntimeModule('server/orchestr'),
+        ...(hasAdminApi ? [resolveRuntimeModule('server/admin/source-entities')] : []),
+      ],
       mediaLibraryProviders: hasAdminApi ? [resolveRuntimeModule('server/admin/media-library')] : [],
       nuxtImageProviders: {
         vendure: {

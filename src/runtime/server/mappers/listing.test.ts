@@ -7,7 +7,11 @@ const facetValue = (id: string, name: string, facetCode: string, facetName: stri
 });
 
 describe('mapFacetsToFilters', () => {
-  const values = [facetValue('1', 'Apple', 'brand', 'Brand', 2), facetValue('2', 'Sony', 'brand', 'Brand', 3), facetValue('3', 'Red', 'colour', 'Colour', 1)];
+  const values = [
+    facetValue('1', 'Apple', 'brand', 'Brand', 2),
+    facetValue('2', 'Sony', 'brand', 'Brand', 3),
+    facetValue('3', 'Red', 'colour', 'Colour', 1),
+  ];
 
   it('groups values by facet and adds the stock filter where the search filters on stock', () => {
     expect(mapFacetsToFilters(values, true)).toEqual([
@@ -22,7 +26,14 @@ describe('mapFacetsToFilters', () => {
           { id: '2', label: 'Sony', count: 3 },
         ],
       },
-      { type: 'list', id: 'colour', label: 'Colour', wellKnownName: 'color', presentation: 'text', values: [{ id: '3', label: 'Red', count: 1 }] },
+      {
+        type: 'list',
+        id: 'colour',
+        label: 'Colour',
+        wellKnownName: 'color',
+        presentation: 'text',
+        values: [{ id: '3', label: 'Red', count: 1 }],
+      },
       { type: 'boolean', id: IN_STOCK_FILTER_ID, label: 'In stock', wellKnownName: 'in-stock' },
     ]);
   });

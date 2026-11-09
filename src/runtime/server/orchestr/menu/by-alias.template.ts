@@ -6,6 +6,9 @@ export default defineVendureQueryTemplateProvider({
   for: MenuByAliasQuery,
   run: async ({ input, context }) => [
     ...(input.term ? [] : [{ input: { alias: 'root' }, label: 'All collections' }]),
-    ...(await collectionChoices(context.catalogClient, input.term)).map((collection) => ({ input: { alias: collection.slug }, label: collection.name })),
+    ...(await collectionChoices(context.catalogClient, input.term)).map((collection) => ({
+      input: { alias: collection.slug },
+      label: collection.name,
+    })),
   ],
 });

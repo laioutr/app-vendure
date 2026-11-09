@@ -88,7 +88,10 @@ describe.skipIf(!ADMIN_API_URL || !ADMIN_API_KEY)('source entities against the A
     )!;
     const original = product.translations![locale]!.name as string;
     restore.push(() =>
-      connector.write!({ entities: [{ id: product.id, operations: [{ op: 'set', index: 0, path: ['name'], locale, value: original }] }] }, ctx)
+      connector.write!(
+        { entities: [{ id: product.id, operations: [{ op: 'set', index: 0, path: ['name'], locale, value: original }] }] },
+        ctx
+      )
     );
 
     const written = await connector.write!(
@@ -127,7 +130,10 @@ describe.skipIf(!ADMIN_API_URL || !ADMIN_API_KEY)('source entities against the A
     const option = (group.translations![locale]!.options as { id: string; name: string }[])[0]!;
     const optionPath = [['options', option.id] as [string, string], 'name'];
     restore.push(() =>
-      connector.write!({ entities: [{ id: group.id, operations: [{ op: 'set', index: 0, path: optionPath, locale, value: option.name }] }] }, ctx)
+      connector.write!(
+        { entities: [{ id: group.id, operations: [{ op: 'set', index: 0, path: optionPath, locale, value: option.name }] }] },
+        ctx
+      )
     );
     const before = new Date().toISOString();
 

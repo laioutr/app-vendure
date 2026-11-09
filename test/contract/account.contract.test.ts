@@ -10,8 +10,21 @@ import {
 import { toCanonicalCustomer } from '../../src/runtime/server/mappers/customer';
 import { login, logout, register, requestPasswordReset, resetPassword } from '../../src/runtime/server/services/auth';
 import { addVariants, removeLine } from '../../src/runtime/server/services/cart';
-import { addPayment, getCheckoutState, orderByCode, setShippingAddress, setShippingMethod, transitionOrder } from '../../src/runtime/server/services/checkout';
-import { activeCustomerOf, createAddress, deleteAddress, setDefaultAddress, updateAddress } from '../../src/runtime/server/services/customer';
+import {
+  addPayment,
+  getCheckoutState,
+  orderByCode,
+  setShippingAddress,
+  setShippingMethod,
+  transitionOrder,
+} from '../../src/runtime/server/services/checkout';
+import {
+  activeCustomerOf,
+  createAddress,
+  deleteAddress,
+  setDefaultAddress,
+  updateAddress,
+} from '../../src/runtime/server/services/customer';
 import { activeOrderOf, customerOrders, orderOfCustomer } from '../../src/runtime/server/services/order';
 
 const PASSWORD = 'Contract-Test-1!';
@@ -23,13 +36,16 @@ describe('accounts against the Shop API', () => {
     const status = await register(shopper.client(), { email, password: PASSWORD, firstName: 'Contract', lastName: 'Test' });
     // The demo requires verification and sends no email anyone can read, so no account there signs in.
     expect(['pending-confirmation', 'signed-in']).toContain(status);
-    if (status === 'pending-confirmation') await expect(login(shopper.client(), email, PASSWORD)).rejects.toBeInstanceOf(CustomerNotConfirmedError);
+    if (status === 'pending-confirmation')
+      await expect(login(shopper.client(), email, PASSWORD)).rejects.toBeInstanceOf(CustomerNotConfirmedError);
     await expect(login(shopper.client(), email, 'wrong-password')).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 
   it('answers a recovery the same for any address, and refuses a made-up reset token', async () => {
     await requestPasswordReset(visitor().client(), `nobody-${Date.now()}@example.com`);
-    await expect(resetPassword(visitor().client(), 'https://shop.example.com/password-reset?token=made-up', PASSWORD)).rejects.toBeInstanceOf(PasswordResetTokenInvalidError);
+    await expect(
+      resetPassword(visitor().client(), 'https://shop.example.com/password-reset?token=made-up', PASSWORD)
+    ).rejects.toBeInstanceOf(PasswordResetTokenInvalidError);
   });
 
   it('refuses the account to a visitor who is not signed in', async () => {
@@ -47,7 +63,14 @@ describe('accounts against the Shop API', () => {
       const customer = toCanonicalCustomer(await activeCustomerOf(shopper.client()));
       expect(customer.email).toBe(email);
 
-      const address = { firstName: 'Contract', lastName: 'Test', address1: `Street ${Date.now()}`, city: 'Berlin', postalCode: '10115', countryCode: 'DE' };
+      const address = {
+        firstName: 'Contract',
+        lastName: 'Test',
+        address1: `Street ${Date.now()}`,
+        city: 'Berlin',
+        postalCode: '10115',
+        countryCode: 'DE',
+      };
       await createAddress(shopper.client(), address);
       const created = (await activeCustomerOf(shopper.client())).addresses!.find((entry) => entry.streetLine1 === address.address1)!;
       await updateAddress(shopper.client(), created.id, { city: 'Hamburg' });
@@ -67,7 +90,14 @@ describe('accounts against the Shop API', () => {
         { productId: '1', variantId: '1', quantity: 1 },
         { productId: '1', variantId: '2', quantity: 2 },
       ]);
-      const address = { firstName: 'Contract', lastName: 'Test', address1: 'Teststrasse 1', city: 'Berlin', postalCode: '10115', countryCode: 'DE' };
+      const address = {
+        firstName: 'Contract',
+        lastName: 'Test',
+        address1: 'Teststrasse 1',
+        city: 'Berlin',
+        postalCode: '10115',
+        countryCode: 'DE',
+      };
       await setShippingAddress(shopper.client(), address);
       const state = await getCheckoutState(shopper.client(), 'USD');
       await setShippingMethod(shopper.client(), [state.shippingMethods[0]!.id]);
@@ -84,7 +114,11 @@ describe('accounts against the Shop API', () => {
       const again = await addVariants(
         sameCustomer.client(),
         sameCustomer.client(),
-        placed!.lines.map((line) => ({ productId: line.productVariant.productId, variantId: line.productVariant.id, quantity: line.quantity }))
+        placed!.lines.map((line) => ({
+          productId: line.productVariant.productId,
+          variantId: line.productVariant.id,
+          quantity: line.quantity,
+        }))
       );
       expect(again.map((outcome) => outcome.item.status)).toEqual(['added', 'added']);
       const cart = await activeOrderOf(sameCustomer.client());

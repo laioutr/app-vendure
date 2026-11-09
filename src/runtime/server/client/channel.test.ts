@@ -2,7 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { channelOf } from './channel';
 import { fakeShopApi } from '../../../../test/fixtures/fakeShopApi';
 
-const channel = { code: 'default', defaultLanguageCode: 'en', availableLanguageCodes: ['en'], defaultCurrencyCode: 'USD', availableCurrencyCodes: ['USD'] };
+const channel = {
+  code: 'default',
+  defaultLanguageCode: 'en',
+  availableLanguageCodes: ['en'],
+  defaultCurrencyCode: 'USD',
+  availableCurrencyCodes: ['USD'],
+};
 
 // Each test uses its own server address: the cache is per process and keyed by it.
 let server = 0;
@@ -17,7 +23,10 @@ describe('channelOf', () => {
 
   it('reads the channel and whether search filters on stock once per interval', async () => {
     vi.useFakeTimers();
-    const api = fakeShopApi({ ActiveChannel: { data: { activeChannel: channel } }, InStockSearchProbe: { data: { search: { totalItems: 3 } } } });
+    const api = fakeShopApi({
+      ActiveChannel: { data: { activeChannel: channel } },
+      InStockSearchProbe: { data: { search: { totalItems: 3 } } },
+    });
     const url = nextServer();
     expect(await channelOf(url, undefined)).toEqual({ channel, searchesByStock: true });
     await channelOf(url, undefined);
@@ -31,7 +40,10 @@ describe('channelOf', () => {
   it('takes a refused stock filter as a search without it', async () => {
     fakeShopApi({
       ActiveChannel: { data: { activeChannel: channel } },
-      InStockSearchProbe: { status: 400, errors: [{ message: 'Field "inStock" is not defined by type "SearchInput".', extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } }] },
+      InStockSearchProbe: {
+        status: 400,
+        errors: [{ message: 'Field "inStock" is not defined by type "SearchInput".', extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } }],
+      },
     });
     expect((await channelOf(nextServer(), undefined)).searchesByStock).toBe(false);
   });
@@ -52,7 +64,10 @@ describe('channelOf', () => {
   });
 
   it('reads each channel of a server apart', async () => {
-    const api = fakeShopApi({ ActiveChannel: { data: { activeChannel: channel } }, InStockSearchProbe: { data: { search: { totalItems: 0 } } } });
+    const api = fakeShopApi({
+      ActiveChannel: { data: { activeChannel: channel } },
+      InStockSearchProbe: { data: { search: { totalItems: 0 } } },
+    });
     const url = nextServer();
     await channelOf(url, 'a');
     await channelOf(url, 'b');

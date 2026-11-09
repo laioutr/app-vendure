@@ -18,7 +18,18 @@ import { productsKnownOrFetched } from '../../services/catalog';
 export default defineVendureComponentResolver({
   entityType: 'Product',
   label: 'Vendure Product Resolver',
-  provides: [ProductBase, ProductBrand, ProductDefaultVariant, ProductDescription, ProductInfo, ProductMedia, ProductOptionGroups, ProductPrices, ProductSeo, ProductFlags],
+  provides: [
+    ProductBase,
+    ProductBrand,
+    ProductDefaultVariant,
+    ProductDescription,
+    ProductInfo,
+    ProductMedia,
+    ProductOptionGroups,
+    ProductPrices,
+    ProductSeo,
+    ProductFlags,
+  ],
   cache: {
     ttl: '1 day',
     components: {

@@ -120,7 +120,11 @@ describe('entityOfRow', () => {
       items: order.map((id) => ({ id, translations: [{ languageCode: 'en', name: `Option ${id}` }] })),
     });
     const sorted = await entityOfRow(PRODUCT_OPTION_GROUP, group(['2', '10', '1']), languages);
-    expect(((sorted as { data: Record<string, unknown> }).data.options as { id: string }[]).map((option) => option.id)).toEqual(['1', '2', '10']);
+    expect(((sorted as { data: Record<string, unknown> }).data.options as { id: string }[]).map((option) => option.id)).toEqual([
+      '1',
+      '2',
+      '10',
+    ]);
     expect((sorted as { version: string }).version).toBe(
       ((await entityOfRow(PRODUCT_OPTION_GROUP, group(['1', '2', '10']), languages)) as { version: string }).version
     );

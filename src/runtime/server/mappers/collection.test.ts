@@ -3,7 +3,12 @@ import { categoryComponents, categoryCrumb, collectionTrail, flattenCollectionTr
 
 describe('collectionTrail', () => {
   it('leaves out the root collection', () => {
-    expect(collectionTrail([{ id: '1', name: 'root', slug: '__root_collection__' }, { id: '2', name: 'A', slug: 'a' }])).toEqual([{ id: '2', name: 'A', slug: 'a' }]);
+    expect(
+      collectionTrail([
+        { id: '1', name: 'root', slug: '__root_collection__' },
+        { id: '2', name: 'A', slug: 'a' },
+      ])
+    ).toEqual([{ id: '2', name: 'A', slug: 'a' }]);
   });
 });
 
@@ -19,7 +24,17 @@ describe('categoryCrumb', () => {
 
 describe('categoryComponents', () => {
   it('describes the category for search engines in plain text', () => {
-    const collection = { id: '1', name: 'Tea', slug: 'tea', description: '<p>Green&nbsp;&amp; black</p>', position: 0, parentId: '0', featuredAsset: null, breadcrumbs: [], children: [] };
+    const collection = {
+      id: '1',
+      name: 'Tea',
+      slug: 'tea',
+      description: '<p>Green&nbsp;&amp; black</p>',
+      position: 0,
+      parentId: '0',
+      featuredAsset: null,
+      breadcrumbs: [],
+      children: [],
+    };
     expect(categoryComponents(collection).seo).toEqual({ title: 'Tea', description: 'Green & black' });
   });
 });
