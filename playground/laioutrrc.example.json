@@ -1,0 +1,530 @@
+{
+  "version": 6,
+  "apps": [
+    {
+      "name": "@laioutr/app-vendure",
+      "version": "0.0.0",
+      "config": {}
+    },
+    {
+      "name": "@laioutr-app/ui",
+      "version": "2.37.3",
+      "config": {
+        "theme": "laioutr"
+      }
+    }
+  ],
+  "globalSections": {},
+  "laioutr": {
+    "projectSecretKey": "playground",
+    "projectSlug": "playground/vendure",
+    "environmentName": "main"
+  },
+  "languages": {
+    "dlangen0000000000000": {
+      "id": "dlangen0000000000000",
+      "code": "en",
+      "name": "English",
+      "fallbacks": [],
+      "domains": ["localhost"]
+    }
+  },
+  "markets": {
+    "dmarket0000000000000": {
+      "id": "dmarket0000000000000",
+      "slug": "default",
+      "name": "Default",
+      "currency": "USD",
+      "regionCodes": [],
+      "defaultDomainId": "ddomain0000000000000",
+      "domains": {
+        "ddomain0000000000000": {
+          "id": "ddomain0000000000000",
+          "host": "localhost",
+          "path": "",
+          "languageId": "dlangen0000000000000"
+        }
+      },
+      "studio": {
+        "flag": "us"
+      }
+    }
+  },
+  "pages": {
+    "dhome000000000000000": {
+      "id": "dhome000000000000000",
+      "path": "/",
+      "type": "core/home",
+      "createdAt": "2026-11-09T00:00:00.000Z",
+      "updatedAt": "2026-11-09T00:00:00.000Z",
+      "queries": {
+        "dhomeproducts0000000": {
+          "id": "dhomeproducts0000000",
+          "createdAt": "2026-11-09T00:00:00.000Z",
+          "updatedAt": "2026-11-09T00:00:00.000Z",
+          "alias": "products",
+          "isRoot": true,
+          "token": "ecommerce/product/by-category-slug",
+          "inputRules": {
+            "categorySlug": {
+              "literal": "electronics"
+            }
+          },
+          "studio": {
+            "label": "Electronics"
+          }
+        }
+      },
+      "variants": {
+        "dhome000000000000000v": {
+          "id": "dhome000000000000000v",
+          "createdAt": "2026-11-09T00:00:00.000Z",
+          "updatedAt": "2026-11-09T00:00:00.000Z",
+          "queries": {},
+          "sections": {
+            "header": {
+              "dheader0000000000000": {
+                "id": "dheader0000000000000",
+                "type": "section",
+                "component": "SectionHeaderShop",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "showCart": {
+                    "type": "static",
+                    "value": true
+                  },
+                  "showCustomerAccount": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showWishlist": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showSearch": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "logoTarget": {
+                    "type": "static",
+                    "value": "_self"
+                  },
+                  "searchBarMobile": {
+                    "type": "static",
+                    "value": "search-icon"
+                  }
+                }
+              }
+            },
+            "body": {
+              "dslider0000000000000": {
+                "id": "dslider0000000000000",
+                "type": "section",
+                "component": "SectionProductSlider",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "products": {
+                    "type": "entity-set",
+                    "queryId": "dhomeproducts0000000"
+                  },
+                  "heading": {
+                    "type": "static-localized",
+                    "value": {
+                      "en": "Electronics",
+                      "de": "Elektronik"
+                    }
+                  },
+                  "headingVisible": {
+                    "type": "static",
+                    "value": true
+                  },
+                  "showAddToCart": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showBrand": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showFlags": {
+                    "type": "static",
+                    "value": true
+                  },
+                  "imageFit": {
+                    "type": "static",
+                    "value": "fit"
+                  },
+                  "imageFormat": {
+                    "type": "static",
+                    "value": "square"
+                  },
+                  "containerStyle": {
+                    "type": "static",
+                    "value": "full-width"
+                  }
+                }
+              }
+            },
+            "footer": {
+              "dfooter0000000000000": {
+                "id": "dfooter0000000000000",
+                "type": "section",
+                "component": "SectionFooter",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "copyrightBy": {
+                    "type": "static",
+                    "value": "Vendure playground"
+                  },
+                  "sectionBackground": {
+                    "type": "static",
+                    "value": "pale"
+                  }
+                }
+              }
+            }
+          },
+          "seo": {
+            "title": {
+              "en": "Home",
+              "de": "Home"
+            },
+            "description": {
+              "en": ""
+            }
+          },
+          "studio": {
+            "label": "Home"
+          }
+        }
+      }
+    },
+    "dpdp0000000000000000": {
+      "id": "dpdp0000000000000000",
+      "path": "/products/:slug+",
+      "type": "ecommerce/product-detail-page",
+      "createdAt": "2026-11-09T00:00:00.000Z",
+      "updatedAt": "2026-11-09T00:00:00.000Z",
+      "queries": {
+        "dpdpquery00000000000": {
+          "id": "dpdpquery00000000000",
+          "createdAt": "2026-11-09T00:00:00.000Z",
+          "updatedAt": "2026-11-09T00:00:00.000Z",
+          "alias": "product",
+          "urlAlias": "_",
+          "token": "ecommerce/product/by-slug",
+          "inputRules": {
+            "slug": {
+              "join": [
+                "/",
+                {
+                  "var": "route.params.slug"
+                }
+              ]
+            }
+          },
+          "studio": {
+            "label": "Product"
+          }
+        }
+      },
+      "variants": {
+        "dpdp0000000000000000v": {
+          "id": "dpdp0000000000000000v",
+          "createdAt": "2026-11-09T00:00:00.000Z",
+          "updatedAt": "2026-11-09T00:00:00.000Z",
+          "queries": {},
+          "sections": {
+            "header": {
+              "dheader0000000000000": {
+                "id": "dheader0000000000000",
+                "type": "section",
+                "component": "SectionHeaderShop",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "showCart": {
+                    "type": "static",
+                    "value": true
+                  },
+                  "showCustomerAccount": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showWishlist": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showSearch": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "logoTarget": {
+                    "type": "static",
+                    "value": "_self"
+                  },
+                  "searchBarMobile": {
+                    "type": "static",
+                    "value": "search-icon"
+                  }
+                }
+              }
+            },
+            "body": {
+              "dpdpsection000000000": {
+                "id": "dpdpsection000000000",
+                "type": "section",
+                "component": "SectionProductDetail",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "product": {
+                    "type": "entity-set",
+                    "queryId": "dpdpquery00000000000"
+                  }
+                },
+                "slots": {
+                  "gallery": {
+                    "dpdpgallery000000000": {
+                      "id": "dpdpgallery000000000",
+                      "type": "block",
+                      "component": "BlockProductMediaGallery",
+                      "index": "a0",
+                      "createdAt": "2026-11-09T00:00:00.000Z",
+                      "updatedAt": "2026-11-09T00:00:00.000Z",
+                      "props": {
+                        "product": {
+                          "type": "entity-set",
+                          "queryId": "dpdpquery00000000000"
+                        }
+                      }
+                    }
+                  },
+                  "content": {
+                    "dpdpbasic00000000000": {
+                      "id": "dpdpbasic00000000000",
+                      "type": "block",
+                      "component": "BlockProductDetailBasicInfo",
+                      "index": "a0",
+                      "createdAt": "2026-11-09T00:00:00.000Z",
+                      "updatedAt": "2026-11-09T00:00:00.000Z",
+                      "props": {
+                        "product": {
+                          "type": "entity-set",
+                          "queryId": "dpdpquery00000000000"
+                        }
+                      }
+                    },
+                    "dpdpprice00000000000": {
+                      "id": "dpdpprice00000000000",
+                      "type": "block",
+                      "component": "BlockProductDetailPriceInfo",
+                      "index": "a1",
+                      "createdAt": "2026-11-09T00:00:00.000Z",
+                      "updatedAt": "2026-11-09T00:00:00.000Z",
+                      "props": {
+                        "product": {
+                          "type": "entity-set",
+                          "queryId": "dpdpquery00000000000"
+                        },
+                        "vatInfoVisible": {
+                          "type": "static",
+                          "value": true
+                        }
+                      }
+                    },
+                    "dpdpvariants00000000": {
+                      "id": "dpdpvariants00000000",
+                      "type": "block",
+                      "component": "BlockProductDetailVariantSelectorOptions",
+                      "index": "a2",
+                      "createdAt": "2026-11-09T00:00:00.000Z",
+                      "updatedAt": "2026-11-09T00:00:00.000Z",
+                      "props": {
+                        "product": {
+                          "type": "entity-set",
+                          "queryId": "dpdpquery00000000000"
+                        }
+                      }
+                    },
+                    "dpdpstock00000000000": {
+                      "id": "dpdpstock00000000000",
+                      "type": "block",
+                      "component": "BlockProductDetailStockInfo",
+                      "index": "a3",
+                      "createdAt": "2026-11-09T00:00:00.000Z",
+                      "updatedAt": "2026-11-09T00:00:00.000Z",
+                      "props": {
+                        "product": {
+                          "type": "entity-set",
+                          "queryId": "dpdpquery00000000000"
+                        }
+                      }
+                    },
+                    "dpdpcart000000000000": {
+                      "id": "dpdpcart000000000000",
+                      "type": "block",
+                      "component": "BlockProductDetailCartButton",
+                      "index": "a4",
+                      "createdAt": "2026-11-09T00:00:00.000Z",
+                      "updatedAt": "2026-11-09T00:00:00.000Z",
+                      "props": {
+                        "product": {
+                          "type": "entity-set",
+                          "queryId": "dpdpquery00000000000"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "footer": {
+              "dfooter0000000000000": {
+                "id": "dfooter0000000000000",
+                "type": "section",
+                "component": "SectionFooter",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "copyrightBy": {
+                    "type": "static",
+                    "value": "Vendure playground"
+                  },
+                  "sectionBackground": {
+                    "type": "static",
+                    "value": "pale"
+                  }
+                }
+              }
+            }
+          },
+          "seo": {
+            "title": {
+              "en": "Product",
+              "de": "Product"
+            },
+            "description": {
+              "en": ""
+            }
+          },
+          "studio": {
+            "label": "Product"
+          }
+        }
+      }
+    },
+    "dcheckout00000000000": {
+      "id": "dcheckout00000000000",
+      "path": "/checkout",
+      "type": "core/landingpage",
+      "createdAt": "2026-11-09T00:00:00.000Z",
+      "updatedAt": "2026-11-09T00:00:00.000Z",
+      "queries": {},
+      "variants": {
+        "dcheckout00000000000v": {
+          "id": "dcheckout00000000000v",
+          "createdAt": "2026-11-09T00:00:00.000Z",
+          "updatedAt": "2026-11-09T00:00:00.000Z",
+          "queries": {},
+          "sections": {
+            "header": {
+              "dheader0000000000000": {
+                "id": "dheader0000000000000",
+                "type": "section",
+                "component": "SectionHeaderShop",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "showCart": {
+                    "type": "static",
+                    "value": true
+                  },
+                  "showCustomerAccount": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showWishlist": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "showSearch": {
+                    "type": "static",
+                    "value": false
+                  },
+                  "logoTarget": {
+                    "type": "static",
+                    "value": "_self"
+                  },
+                  "searchBarMobile": {
+                    "type": "static",
+                    "value": "search-icon"
+                  }
+                }
+              }
+            },
+            "body": {
+              "dcheckoutsection0000": {
+                "id": "dcheckoutsection0000",
+                "type": "section",
+                "component": "VendureCheckout",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {}
+              }
+            },
+            "footer": {
+              "dfooter0000000000000": {
+                "id": "dfooter0000000000000",
+                "type": "section",
+                "component": "SectionFooter",
+                "index": "a0",
+                "createdAt": "2026-11-09T00:00:00.000Z",
+                "updatedAt": "2026-11-09T00:00:00.000Z",
+                "props": {
+                  "copyrightBy": {
+                    "type": "static",
+                    "value": "Vendure playground"
+                  },
+                  "sectionBackground": {
+                    "type": "static",
+                    "value": "pale"
+                  }
+                }
+              }
+            }
+          },
+          "seo": {
+            "title": {
+              "en": "Checkout",
+              "de": "Checkout"
+            },
+            "description": {
+              "en": ""
+            }
+          },
+          "studio": {
+            "label": "Checkout"
+          }
+        }
+      }
+    }
+  },
+  "templates": {
+    "pages": {},
+    "blocks": {},
+    "sections": {},
+    "sharedSections": {}
+  }
+}

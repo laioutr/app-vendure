@@ -34,6 +34,26 @@
         ]
       },
       {
+        "label": "Checkout",
+        "description": "Vendure has no hosted checkout: shoppers check out on a page of this storefront that holds the Vendure Checkout section.",
+        "fields": [
+          {
+            "name": "checkoutPath",
+            "type": "text",
+            "label": "Checkout page",
+            "description": "The path of the page with the Vendure Checkout section, where the cart's Checkout button leads. When empty, /checkout.",
+            "placeholder": "/checkout"
+          },
+          {
+            "name": "providerPaymentMethods",
+            "type": "text",
+            "label": "Payment methods paid with a provider",
+            "description": "Codes of the shop's payment methods that need a payment provider's own form or redirect, such as a Stripe or Mollie method, separated by commas. The checkout cannot take payment with them yet and shows them as not available. Leave empty when every method completes without one.",
+            "placeholder": "stripe, mollie"
+          }
+        ]
+      },
+      {
         "label": "Admin API",
         "description": "Optional. With both fields, the shop's texts can be translated with Translatr and its assets appear in Studio's media library. Without them, the storefront works as before and neither is offered.",
         "fields": [

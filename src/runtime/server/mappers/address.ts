@@ -1,4 +1,5 @@
 import type { AddressFieldsFragment, CreateAddressInput, OrderAddressFieldsFragment, UpdateAddressInput } from '../types/vendure.generated';
+import { toE164 } from '../../shared/phone';
 
 /** The canonical mailing address, written out so this module needs no runtime import of the schema. */
 export interface MailingAddressValue {
@@ -16,13 +17,7 @@ export interface MailingAddressValue {
   provinceCode?: string;
 }
 
-const E164 = /^\+?[1-9]\d{1,14}$/;
-
-/** A phone number in the E.164 form the canonical schema takes, or nothing: Vendure stores free text. */
-export const toE164 = (phone: string | null | undefined): string | undefined => {
-  const compact = phone?.replace(/[\s\-().]/g, '');
-  return compact && E164.test(compact) ? compact : undefined;
-};
+export { toE164 };
 
 /** Vendure keeps one `fullName`; the first word is taken as the first name, the rest as the last. */
 export const splitFullName = (fullName: string | null | undefined): { firstName: string; lastName: string } => {

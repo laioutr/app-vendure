@@ -4,7 +4,9 @@ import {
   ProductVariantInfo,
   ProductVariantOptions,
   ProductVariantPrices,
+  ProductVariantQuantityPrices,
   ProductVariantQuantityRule,
+  ProductVariantShipping,
 } from '@laioutr-core/canonical-types/entity/product-variant';
 import { variantsToken } from '../../const/passthroughTokens';
 import { variantComponents } from '../../mappers/product';
@@ -24,6 +26,8 @@ export default defineVendureComponentResolver({
     ProductVariantPrices,
     ProductVariantOptions,
     ProductVariantQuantityRule,
+    ProductVariantQuantityPrices,
+    ProductVariantShipping,
   ],
   cache: false,
   resolve: ({ entityIds, passthrough, $entity }) => {

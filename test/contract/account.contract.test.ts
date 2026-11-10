@@ -99,10 +99,10 @@ describe('accounts against the Shop API', () => {
         countryCode: 'DE',
       };
       await setShippingAddress(shopper.client(), address);
-      const state = await getCheckoutState(shopper.client(), 'USD');
+      const state = await getCheckoutState(shopper.client(), 'USD', []);
       await setShippingMethod(shopper.client(), [state.shippingMethods[0]!.id]);
       await transitionOrder(shopper.client(), 'ArrangingPayment');
-      const payment = await addPayment(shopper.client(), state.paymentMethods.find((method) => method.isEligible)!.code, {});
+      const payment = await addPayment(shopper.client(), state.paymentMethods.find((method) => method.isEligible)!.code, {}, []);
 
       const sameCustomer = visitor();
       await login(sameCustomer.client(), email!, password!);

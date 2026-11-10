@@ -3,7 +3,7 @@ import { mapImage } from './media';
 import { money } from './money';
 import { variantAvailability, variantOptions } from './product';
 import type { DiscountFieldsFragment, OrderFieldsFragment, OrderLineFieldsFragment } from '../types/vendure.generated';
-import type { Money } from '@laioutr-core/core-types/common';
+import type { Link, Money } from '@laioutr-core/core-types/common';
 
 type Order = OrderFieldsFragment;
 type Line = OrderLineFieldsFragment;
@@ -15,7 +15,7 @@ export const couponCodeOfItemId = (itemId: string): string | undefined =>
   itemId.startsWith(COUPON_ITEM_PREFIX) ? itemId.slice(COUPON_ITEM_PREFIX.length) : undefined;
 
 /** A discount amount as the positive value it took off; Vendure answers it negative. */
-const mapDiscounts = (discounts: readonly DiscountFieldsFragment[], currency: string, couponCodes: readonly string[] = []) =>
+export const mapDiscounts = (discounts: readonly DiscountFieldsFragment[], currency: string, couponCodes: readonly string[] = []) =>
   discounts.map((discount) => ({
     name: discount.description,
     // Vendure links a discount to its promotion, not to the code that unlocked it; a single code is
@@ -45,11 +45,11 @@ export const cartItemIds = (order: Pick<Order, 'lines' | 'couponCodes'>) => [
   ...order.couponCodes.map(couponItemId),
 ];
 
-export const cartComponents = (order: Order) => {
+/** `checkoutLink` leads to the storefront's own checkout page: Vendure has no hosted checkout. */
+export const cartComponents = (order: Order, checkoutLink: Link) => {
   const currency = order.currencyCode;
   return {
-    // Vendure has no hosted checkout to link to; the storefront runs it through the checkout actions.
-    base: { totalQuantity: order.totalQuantity },
+    base: { totalQuantity: order.totalQuantity, checkoutLink },
     cost: {
       subtotal: money(order.subTotalWithTax, currency),
       subtotalIsEstimated: false,
@@ -63,6 +63,9 @@ export const cartComponents = (order: Order) => {
     },
   };
 };
+
+/** Vendure core keeps no price per measurement unit (per kilogram, per litre), the one thing this component holds. */
+const NO_PRODUCT_DATA = {};
 
 export const cartLineComponents = (line: Line, currency: string) => {
   const availability = variantAvailability(line.productVariant.stockLevel);
@@ -84,6 +87,7 @@ export const cartLineComponents = (line: Line, currency: string) => {
     },
     availability: { status: availability.status, quantity: availability.quantity },
     quantityRule: { min: 1, increment: 1, canChange: true },
+    productData: NO_PRODUCT_DATA,
   };
 };
 
@@ -92,6 +96,7 @@ export const cartCouponComponents = (code: string, currency: string) => ({
   cost: { single: money(0, currency), subtotal: money(0, currency), total: money(0, currency) },
   availability: { status: 'inStock' as const, quantity: 1 },
   quantityRule: { min: 1, max: 1, increment: 1, canChange: false },
+  productData: NO_PRODUCT_DATA,
 });
 
 /**

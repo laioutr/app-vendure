@@ -136,4 +136,10 @@ describe('productComponents and variantComponents', () => {
     const bare = variant({ featuredAsset: null });
     expect(variantComponents(bare, { featuredAsset: asset() }).info().image?.sources[0]?.src).toBe(asset().preview);
   });
+
+  it('answers no tier prices and a shipping that every variant needs, priced with the order', () => {
+    const components = variantComponents(variant(), { featuredAsset: null });
+    expect(components.quantityPrices()).toEqual([]);
+    expect(components.shipping()).toEqual({ required: true });
+  });
 });

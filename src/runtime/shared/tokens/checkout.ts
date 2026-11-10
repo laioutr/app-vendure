@@ -39,7 +39,9 @@ export const VendureCheckoutLine = z.object({
   quantity: z.number(),
   /** The price of one unit, with tax. */
   unitPrice: Money,
-  /** The line's total after its discounts, with tax. */
+  /** The line's price before any promotion, with tax. */
+  subtotal: Money,
+  /** The line's total after its own promotions, with tax. */
   total: Money,
   /** The URL of the line's image, when it has one. */
   imageUrl: z.string().optional(),
@@ -64,8 +66,16 @@ export const VendureCheckoutOrder = z.object({
   shippingMethodIds: z.array(z.string()),
   couponCodes: z.array(z.string()),
   totalQuantity: z.number(),
+  /** The lines before any promotion, with tax. */
   subtotal: Money,
+  /** Shipping before any promotion, with tax. */
   shipping: Money,
+  /**
+   * Every promotion the order gets — on a line, on the order, on shipping — as the positive amount it
+   * takes off, with tax: `subtotal + shipping − discounts = total`. The coupons that unlocked some of
+   * them are `couponCodes`.
+   */
+  discounts: z.array(z.object({ name: z.string(), amount: Money })),
   tax: Money,
   total: Money,
   lines: z.array(VendureCheckoutLine),
@@ -79,6 +89,7 @@ export const VendureShippingMethodQuote = z.object({
   id: z.string(),
   code: z.string(),
   name: z.string(),
+  /** Plain text; the shop writes it as rich text. */
   description: z.string().optional(),
   price: Money,
 });
@@ -91,9 +102,16 @@ export const VendurePaymentMethodQuote = z.object({
   /** The value `add-payment` takes as `method`. */
   code: z.string(),
   name: z.string(),
+  /** Plain text; the shop writes it as rich text. */
   description: z.string().optional(),
   isEligible: z.boolean(),
   eligibilityMessage: z.string().optional(),
+  /**
+   * Whether `add-payment` alone completes a payment with it. False for a method the shop pays in a
+   * provider's own flow (a card widget, a redirect), named in the app's `providerPaymentMethods`
+   * setting: this app does not run such a flow.
+   */
+  completesHere: z.boolean(),
 });
 
 /**
@@ -180,6 +198,11 @@ export const VendureCheckoutTransitionAction = defineActionToken('vendure/checko
  * handler as it is — a payment provider's token, for instance. When the payment settles or is
  * authorized, the order is placed and leaves the cart; the answer's `code` reads it back.
  *
+ * Refused before the shop's handler is reached: a method paid in a provider's own flow
+ * (`payment-method-not-eligible`), and an order not in `ArrangingPayment` or already holding an
+ * authorized or settled payment (`order-not-awaiting-payment`). A declined or failed payment puts the
+ * order back to `AddingItems`, so its cart can be changed before the next try.
+ *
  * @public
  * @throws {@link VendureOrderError} `payment-method-not-eligible`, `payment-failed`, `payment-declined`,
  * `order-not-awaiting-payment`, `coupon-removed`, `no-active-order`.
@@ -193,15 +216,17 @@ export const VendureCheckoutAddPaymentAction = defineActionToken('vendure/checko
 });
 
 /**
- * Reads an order by its code for the confirmation page. Answered only to the browser that placed it
- * — `add-payment` remembers the code in a signed, http-only cookie — and to the signed-in customer
- * the order belongs to. Anyone else, and any unknown or expired code, gets {@link OrderNotFoundError}.
- * Vendure stops answering a guest's order some time after it was placed (two hours by default).
+ * Reads an order for the confirmation page: the one with `code`, or without it the newest this browser
+ * placed, so the confirmation needs no order number in the page address. Answered only to the browser
+ * that placed it — `add-payment` remembers the code in a signed, http-only cookie — and to the
+ * signed-in customer the order belongs to. Anyone else, and any unknown or expired code, gets
+ * {@link OrderNotFoundError}. Vendure stops answering a guest's order some time after it was placed
+ * (two hours by default).
  *
  * @public
  * @throws {@link OrderNotFoundError}
  */
 export const VendureCheckoutOrderByCodeAction = defineActionToken('vendure/checkout/order-by-code', {
-  input: z.object({ code: z.string() }),
+  input: z.object({ code: z.string().optional() }),
   output: z.object({ order: VendureCheckoutOrder }),
 });

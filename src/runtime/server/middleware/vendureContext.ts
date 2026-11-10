@@ -1,5 +1,7 @@
+import { checkoutLinkOf } from '../../shared/checkoutPath';
 import { channelOf } from '../client/channel';
 import { VendureClient } from '../client/VendureClient';
+import { paymentMethodCodesOf } from '../mappers/checkout';
 import { requestLocale } from '../mappers/localization';
 
 export interface VendureSettings {
@@ -8,6 +10,8 @@ export interface VendureSettings {
   languageCode?: string;
   adminApiUrl?: string;
   adminApiKey?: string;
+  checkoutPath?: string;
+  providerPaymentMethods?: string;
 }
 
 export interface VendureRequest {
@@ -59,6 +63,10 @@ export const vendureContext = async (settings: VendureSettings | undefined, requ
     currencyCode: locale.currencyCode ?? request.market.currency,
     /** The channel's languages and currencies; absent while the Shop API cannot be read. */
     channel: read?.channel,
+    /** Where the cart's Checkout button leads: the page holding the checkout section. */
+    checkoutLink: checkoutLinkOf(settings.checkoutPath),
+    /** Codes of the payment methods paid in a provider's own flow, which checkout cannot complete. */
+    providerPaymentMethods: paymentMethodCodesOf(settings.providerPaymentMethods),
     /** Whether listings offer the in-stock filter. */
     searchesByStock: read?.searchesByStock ?? false,
     /**

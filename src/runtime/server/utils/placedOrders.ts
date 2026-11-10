@@ -27,6 +27,15 @@ export const withPlacedOrder = (codes: readonly string[], code: string, secret: 
   return `${kept}.${signatureOf(secret, kept)}`;
 };
 
+/**
+ * The order a confirmation reads: the code asked for, else the newest this browser placed; and whether
+ * this browser placed it. Nothing when no code is asked for and none was placed here.
+ */
+export const placedOrderToShow = (requested: string | undefined, placedCodes: readonly string[]) => {
+  const code = requested ?? placedCodes.at(-1);
+  return code ? { code, placedHere: placedCodes.includes(code) } : undefined;
+};
+
 let processSecret: string | undefined;
 
 /**

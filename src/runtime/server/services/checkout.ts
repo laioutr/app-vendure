@@ -4,12 +4,19 @@ import type { MailingAddressValue } from '../mappers/address';
 import { VendureOrderError } from '../../shared/errors';
 import { operations } from '../client/operations';
 import { toCreateAddressInput } from '../mappers/address';
-import { checkoutOrder, checkoutState } from '../mappers/checkout';
+import { checkoutOrder, checkoutState, completesHere, paymentRefusalOf } from '../mappers/checkout';
+import { warnOnce } from '../utils/warnOnce';
 
-export const getCheckoutState = async (client: VendureClient, fallbackCurrency: string) => {
+export const getCheckoutState = async (client: VendureClient, fallbackCurrency: string, providerPaymentMethods: readonly string[]) => {
   // Without a session there is no order, and asking would only start a session.
   if (!client.hasSession) return { order: null, shippingMethods: [], paymentMethods: [], nextStates: [], countries: [] };
-  return checkoutState(await client.request(operations.checkoutState), fallbackCurrency);
+  const state = checkoutState(await client.request(operations.checkoutState), fallbackCurrency, providerPaymentMethods);
+  if (state.paymentMethods.length && !state.paymentMethods.some((method) => method.completesHere))
+    warnOnce(
+      'no-payable-method',
+      '[vendure] Every payment method of the shop is listed in providerPaymentMethods, so no order can be paid on the checkout page. Set up a method whose handler completes without a provider flow.'
+    );
+  return state;
 };
 
 export const setCustomer = async (
@@ -46,10 +53,40 @@ export const transitionOrder = async (client: VendureClient, state: string) => {
   return { state };
 };
 
-export const addPayment = async (client: VendureClient, method: string, metadata: Record<string, unknown> | undefined) => {
-  const order = await client.mutate(operations.addPaymentToOrder, { input: { method, metadata: metadata ?? {} } }, 'addPaymentToOrder');
-  if (order.__typename !== 'Order') throw new VendureOrderError('payment-failed');
-  return { code: order.code, state: order.state };
+/** Moves an order awaiting payment back to `AddingItems`; answers whether it moved. */
+export const reopenOrder = (client: VendureClient) =>
+  transitionOrder(client, 'AddingItems').then(
+    () => true,
+    () => false
+  );
+
+const isPaymentRefused = (error: unknown) =>
+  error instanceof VendureOrderError && (error.data.reason === 'payment-declined' || error.data.reason === 'payment-failed');
+
+/**
+ * Adds a payment, once. A method paid in a provider's own flow, an order not awaiting payment and one
+ * that already holds an authorized or settled payment are refused before Vendure is asked, so a repeated
+ * request cannot reach the payment handler a second time. A declined or failed payment puts the order
+ * back to `AddingItems`, so the shopper can change the cart before trying again.
+ */
+export const addPayment = async (
+  client: VendureClient,
+  method: string,
+  metadata: Record<string, unknown> | undefined,
+  providerPaymentMethods: readonly string[]
+) => {
+  if (!completesHere(method, providerPaymentMethods)) throw new VendureOrderError('payment-method-not-eligible');
+  const { activeOrder } = await client.request(operations.activeOrderPaymentState);
+  const refusal = paymentRefusalOf(activeOrder);
+  if (refusal) throw new VendureOrderError(refusal);
+  try {
+    const order = await client.mutate(operations.addPaymentToOrder, { input: { method, metadata: metadata ?? {} } }, 'addPaymentToOrder');
+    if (order.__typename !== 'Order') throw new VendureOrderError('payment-failed');
+    return { code: order.code, state: order.state };
+  } catch (error) {
+    if (isPaymentRefused(error)) await reopenOrder(client);
+    throw error;
+  }
 };
 
 /**

@@ -1,11 +1,11 @@
-import { defineVitestConfig } from '@nuxt/test-utils/config';
+import { defineConfig } from 'vitest/config';
 
-export default defineVitestConfig({
+/**
+ * Unit tests are plain functions and classes, so they run in Node: booting the playground's Nuxt for
+ * them would build the whole storefront it renders.
+ */
+export default defineConfig({
   test: {
-    // The nuxt environment collects only `*.nuxt.test.ts` unless `include` is set.
     include: ['src/**/*.test.ts'],
-    environmentOptions: {
-      nuxt: { rootDir: './playground' },
-    },
   },
 });

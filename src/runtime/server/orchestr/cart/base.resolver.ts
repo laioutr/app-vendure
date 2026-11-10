@@ -14,7 +14,7 @@ export default defineVendureComponentResolver({
     const found = order && entityIds.includes(order.id) ? order : undefined;
     if (!found) return { entities: [], notFound: entityIds };
 
-    const components = cartComponents(found);
+    const components = cartComponents(found, context.checkoutLink);
     return {
       entities: [$entity({ id: found.id, base: () => components.base, cost: () => components.cost })],
       notFound: entityIds.filter((id) => id !== found.id),

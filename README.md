@@ -12,19 +12,19 @@ MIT licensed.
 
 Every canonical ecommerce token of `@laioutr-core/canonical-types` that the Shop API can answer.
 
-| Area               | Tokens                                                                                                                                                                                                                                                                                                   | Vendure                                                                                                                                                                                                                 |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Products           | `product/by-slug`, `by-id`, the Product resolver (base, brand, default variant, description, info, media, option groups, prices, SEO, flags), `product/variants`, `product/breadcrumb`, `product/all-categories`, the ProductVariant resolver (base, info, availability, prices, options, quantity rule) | `product`, `products`                                                                                                                                                                                                   |
-| Listing and search | `product/by-category-slug`, `by-category-id`, `category/products`, `product/search` — facet filters, an in-stock filter where the server indexes stock, sortings by relevance, name and price                                                                                                            | `search` (one result per product)                                                                                                                                                                                       |
-| Suggested search   | `suggested-search/search`, `entries`, `products`                                                                                                                                                                                                                                                         | `search` and a collection name match                                                                                                                                                                                    |
-| Categories         | `category/by-slug`, `by-id`, `all`, the Category resolver, `category/breadcrumb`, `category/child-categories`                                                                                                                                                                                            | `collection`, `collections`                                                                                                                                                                                             |
-| Menu               | `menu/by-alias` — `root` or `main` is the whole collection tree, any other alias the collections below the one with that slug                                                                                                                                                                            | `collections`                                                                                                                                                                                                           |
-| Cart               | `cart/get-current`, Cart and CartItem resolvers, `cart/cart-items`, `cart/cart-item-product-variant`, `cart/add-items` (products and coupon codes), `cart/update-items`, `cart/remove-items`                                                                                                             | `activeOrder`, `addItemsToOrder`, `adjustOrderLine`, `removeOrderLine`, `applyCouponCode`, `removeCouponCode`                                                                                                           |
-| Sign-in            | `auth/login`, `logout`, `register`, `confirm-email`, `recover`, `reset-password`                                                                                                                                                                                                                         | `login`, `logout`, `registerCustomerAccount`, `verifyCustomerAccount`, `updateCustomerEmailAddress`, `requestPasswordReset`, `resetPassword`                                                                            |
-| Customer           | `customer/get-current`, `update`, `change-email`, `change-password`, `address-get-all`, `address-create`, `address-update`, `address-delete`, `address-set-default`                                                                                                                                      | `activeCustomer`, `updateCustomer`, `requestUpdateCustomerEmailAddress`, `updateCustomerPassword`, `*CustomerAddress`                                                                                                   |
-| Orders             | `order/all`, `order/by-id`, the Order and OrderItem resolvers, `order/items`, `order-item/product-variant`, `order/reorder`, `order/get-statistics`                                                                                                                                                      | `activeCustomer.orders`, `order`                                                                                                                                                                                        |
-| Checkout           | the app's own `vendure/checkout/*` actions, see below                                                                                                                                                                                                                                                    | `setCustomerForOrder`, `setOrderShippingAddress`, `setOrderBillingAddress`, `eligibleShippingMethods`, `setOrderShippingMethod`, `transitionOrderToState`, `eligiblePaymentMethods`, `addPaymentToOrder`, `orderByCode` |
-| Sitemap and Studio | page indexes for the product detail and product listing pages; query templates for product by id, category by id or slug, products by category id or slug, menu by alias                                                                                                                                 | `products`, `collections`                                                                                                                                                                                               |
+| Area               | Tokens                                                                                                                                                                                                                                                                                                                              | Vendure                                                                                                                                                                                                                 |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Products           | `product/by-slug`, `by-id`, the Product resolver (base, brand, default variant, description, info, media, option groups, prices, SEO, flags), `product/variants`, `product/breadcrumb`, `product/all-categories`, the ProductVariant resolver (base, info, availability, prices, options, quantity rule, quantity prices, shipping) | `product`, `products`                                                                                                                                                                                                   |
+| Listing and search | `product/by-category-slug`, `by-category-id`, `category/products`, `product/search` — facet filters, an in-stock filter where the server indexes stock, sortings by relevance, name and price                                                                                                                                       | `search` (one result per product)                                                                                                                                                                                       |
+| Suggested search   | `suggested-search/search`, `entries`, `products`                                                                                                                                                                                                                                                                                    | `search` and a collection name match                                                                                                                                                                                    |
+| Categories         | `category/by-slug`, `by-id`, `all`, the Category resolver, `category/breadcrumb`, `category/child-categories`                                                                                                                                                                                                                       | `collection`, `collections`                                                                                                                                                                                             |
+| Menu               | `menu/by-alias` — `root` or `main` is the whole collection tree, any other alias the collections below the one with that slug                                                                                                                                                                                                       | `collections`                                                                                                                                                                                                           |
+| Cart               | `cart/get-current`, Cart (with the checkout link) and CartItem (with product data) resolvers, `cart/cart-items`, `cart/cart-item-product-variant`, `cart/add-items` (products and coupon codes), `cart/update-items`, `cart/remove-items`                                                                                           | `activeOrder`, `addItemsToOrder`, `adjustOrderLine`, `removeOrderLine`, `applyCouponCode`, `removeCouponCode`                                                                                                           |
+| Sign-in            | `auth/login`, `logout`, `register`, `confirm-email`, `recover`, `reset-password`                                                                                                                                                                                                                                                    | `login`, `logout`, `registerCustomerAccount`, `verifyCustomerAccount`, `updateCustomerEmailAddress`, `requestPasswordReset`, `resetPassword`                                                                            |
+| Customer           | `customer/get-current`, `update`, `change-email`, `change-password`, `address-get-all`, `address-create`, `address-update`, `address-delete`, `address-set-default`                                                                                                                                                                 | `activeCustomer`, `updateCustomer`, `requestUpdateCustomerEmailAddress`, `updateCustomerPassword`, `*CustomerAddress`                                                                                                   |
+| Orders             | `order/all`, `order/by-id`, the Order and OrderItem resolvers, `order/items`, `order-item/product-variant`, `order/reorder`, `order/get-statistics`                                                                                                                                                                                 | `activeCustomer.orders`, `order`                                                                                                                                                                                        |
+| Checkout           | the app's own `vendure/checkout/*` actions and the `VendureCheckout` section, see below                                                                                                                                                                                                                                             | `setCustomerForOrder`, `setOrderShippingAddress`, `setOrderBillingAddress`, `eligibleShippingMethods`, `setOrderShippingMethod`, `transitionOrderToState`, `eligiblePaymentMethods`, `addPaymentToOrder`, `orderByCode` |
+| Sitemap and Studio | page indexes for the product detail and product listing pages; query templates for product by id, category by id or slug, products by category id or slug, menu by alias                                                                                                                                                            | `products`, `collections`                                                                                                                                                                                               |
 
 With the Admin API settings (see [Admin API](#admin-api)):
 
@@ -58,13 +58,15 @@ export default defineNuxtConfig({
 
 ### Settings
 
-| Setting        | Required | What it does                                                                                                        |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `shopApiUrl`   | yes      | The Shop API endpoint.                                                                                              |
-| `channelToken` | no       | Selects a channel of a multi-channel server; sent as the `vendure-token` header. Empty selects the default channel. |
-| `languageCode` | no       | A Vendure language code sent with every request. Empty sends the visitor's language, when the channel offers it.    |
-| `adminApiUrl`  | no       | The Admin API endpoint, e.g. `https://shop.example.com/admin-api`.                                                  |
-| `adminApiKey`  | no       | An Admin API key, sent as the `vendure-api-key` header.                                                             |
+| Setting                  | Required | What it does                                                                                                        |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `shopApiUrl`             | yes      | The Shop API endpoint.                                                                                              |
+| `channelToken`           | no       | Selects a channel of a multi-channel server; sent as the `vendure-token` header. Empty selects the default channel. |
+| `languageCode`           | no       | A Vendure language code sent with every request. Empty sends the visitor's language, when the channel offers it.    |
+| `adminApiUrl`            | no       | The Admin API endpoint, e.g. `https://shop.example.com/admin-api`.                                                  |
+| `adminApiKey`            | no       | An Admin API key, sent as the `vendure-api-key` header.                                                             |
+| `checkoutPath`           | no       | The page holding the `VendureCheckout` section; the cart's Checkout button leads there. `/checkout` when empty.     |
+| `providerPaymentMethods` | no       | Codes of payment methods paid in a provider's own flow, comma-separated; the checkout shows them as not available.  |
 
 The settings are server-only runtime config; none reaches the browser. Without both `adminApiUrl` and
 `adminApiKey`, translation and the media library are not registered at all, and nothing else changes. They are read
@@ -221,25 +223,113 @@ names them in its error, so a feed can ask again without them.
 Vendure has no hosted checkout and `@laioutr-core/canonical-types` has no checkout tokens, so the app defines its
 own actions under `vendure/checkout/*` (exported from `@laioutr/app-vendure/runtime`):
 
-| Action                                                                | Does                                                                                                                                |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `VendureCheckoutGetStateAction`                                       | The order, eligible shipping and payment methods, next states and countries, in one call.                                           |
-| `VendureCheckoutSetCustomerAction`                                    | Names the customer of a guest order.                                                                                                |
-| `VendureCheckoutSetShippingAddressAction`, `…SetBillingAddressAction` | Sets the addresses.                                                                                                                 |
-| `VendureCheckoutSetShippingMethodAction`                              | Sets the shipping method.                                                                                                           |
-| `VendureCheckoutTransitionAction`                                     | Moves the order to `ArrangingPayment`, or back to `AddingItems`.                                                                    |
-| `VendureCheckoutAddPaymentAction`                                     | Adds a payment with a method's code and the provider's metadata.                                                                    |
-| `VendureCheckoutOrderByCodeAction`                                    | Reads the placed order for the confirmation page — only in the browser that placed it, or for the signed-in customer it belongs to. |
+| Action                                                                | Does                                                                                                                           |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `VendureCheckoutGetStateAction`                                       | The order, eligible shipping and payment methods, next states and countries, in one call.                                      |
+| `VendureCheckoutSetCustomerAction`                                    | Names the customer of a guest order.                                                                                           |
+| `VendureCheckoutSetShippingAddressAction`, `…SetBillingAddressAction` | Sets the addresses.                                                                                                            |
+| `VendureCheckoutSetShippingMethodAction`                              | Sets the shipping method.                                                                                                      |
+| `VendureCheckoutTransitionAction`                                     | Moves the order to `ArrangingPayment`, or back to `AddingItems`.                                                               |
+| `VendureCheckoutAddPaymentAction`                                     | Adds a payment with a method's code and the provider's metadata; refuses a second one.                                         |
+| `VendureCheckoutOrderByCodeAction`                                    | Reads a placed order (by code, or the newest placed here) — only in the browser that placed it, or for its signed-in customer. |
 
 Vendure answers a guest's order to anyone who knows its code for a while after it is placed. The app does not:
 `add-payment` remembers the placed order's code in a signed, http-only cookie (`vendure-placed-orders`, signed with
 the project's secret key), and `order-by-code` answers only that browser or the signed-in customer who owns the order.
-Everyone else gets `OrderNotFoundError`, as for an unknown or expired code.
+Everyone else gets `OrderNotFoundError`, as for an unknown or expired code. Vendure's own Shop API still answers the
+code to anyone for its anonymous access window (`orderByCodeAccessStrategy`, two hours by default), so a merchant who
+wants less shortens that window or sets a stricter strategy on the server. The section keeps the code out of the page
+address and out of every analytics event but the purchase.
+
+`add-payment` adds a payment once: a method named in `providerPaymentMethods`, an order not in `ArrangingPayment`
+and an order that already has an authorized or settled payment are refused before the shop's payment handler is
+reached. A declined or failed payment moves the order back to `AddingItems`, and a cart change (add, quantity,
+remove) on an order still awaiting payment — a shopper who left checkout on the payment step — moves it back once and
+runs again, so the cart never refuses a change because of an unfinished checkout.
 
 A real payment provider (Stripe, Mollie, …) is a Vendure server plugin; its client-side step (a card form, a
 redirect) runs in the storefront and hands its result to `add-payment` as `metadata`.
 
-**Not built yet:** a checkout section in the Laioutr UI on top of these actions. It is the next step.
+### The checkout section
+
+The app ships a section, **Vendure Checkout** (`VendureCheckout`, Studio kit "Checkout", tag "Checkout & Cart"),
+built on these actions with the components of `@laioutr-app/ui`. It is registered only where the storefront installs
+`@laioutr-app/ui` as a module — in `modules` of its nuxt.config or among its laioutrrc apps — and the package is
+present (an optional peer dependency). A package that is only present is not enough; without it the app logs once that
+the section is not offered and works as before.
+
+Put it on a page of its own (a landing page at `/checkout`) and point the `checkoutPath` setting there if the page
+lives elsewhere — the cart's `checkoutLink` is that path, so the cart sheet's Checkout button opens it.
+
+**Markets and languages under a path prefix.** The link is a plain `url` link: frontend-core passes it on as written,
+without the market's path prefix or a translated path. The setting is one value per environment, so:
+
+- with one market, or markets on their own domains, set the path the page has (`/checkout`, `/kasse`);
+- with one market under a prefix, write the prefix into the setting (`/de/kasse`);
+- with several markets under prefixes (`/de`, `/at`) or a checkout path translated per language, one value cannot
+  lead each market to its own page. Give the checkout page the same path in every market and language, at the
+  domain's root, or use a full URL per environment. A link that resolves per market and language needs a page type
+  for the checkout (see [docs/gaps.md](docs/gaps.md)).
+
+The shopper walks four steps on one page, with the order summary beside them (below them on a phone):
+
+1. **Contact** — email, first and last name of a guest (`set-customer`). A signed-in customer is the order's
+   customer already and is shown as "Signed in as …". No sign-in link is offered: the canonical types name no login
+   page a section could link to.
+2. **Address** — the shipping address, with the countries the channel ships to; the billing address is the same
+   unless the shopper unticks it (`set-shipping-address`, `set-billing-address`).
+3. **Delivery** — the eligible shipping methods with their prices (`set-shipping-method`).
+4. **Payment** — the payment methods, the total and "Place order" (`transition` to `ArrangingPayment`, then
+   `add-payment`). "Place order" is disabled while the order is on its way, and a second press or Enter sends
+   nothing. The page then shows the confirmation, read back with `order-by-code`, and the header's cart empties. A
+   reload in the same tab shows the confirmation again: the tab remembers that it placed an order (session storage,
+   no order number), and the server answers the newest order its signed cookie names. A later visit with an empty
+   cart shows the empty cart.
+
+If no payment method can be paid on the page (all of them run in a provider's flow), the step says so and asks the
+shopper to contact the shop, and the server logs once that no method is payable. If the payment is declined, the
+order goes back to `AddingItems` by itself: the payment step shows why, the cart can be changed, and Place order tries
+again.
+
+Every step writes to the order in Vendure and reads it back, so a shopper who returns, or reloads, continues where
+they left off; "Change" reopens an earlier step (and moves an order awaiting payment back to `AddingItems`). The
+section reads the order again whenever the cart changes elsewhere on the page (the header's cart sheet) or the tab
+comes back into view, so the summary and the total are the ones Vendure will charge. Fields are checked in the browser
+first; a refusal from Vendure is shown in the words of the step ("The payment was declined…", "This email address
+belongs to a customer account…"), never as Vendure's own message. An empty cart shows an empty state with "Continue
+shopping".
+
+The summary lists the lines and shipping at their prices before promotions and every promotion — on a line, on the
+order, on shipping — by its name, so lines + shipping − discounts = total. Coupon codes show as badges.
+
+For keyboard and screen-reader users, the focus moves to the next step's heading once a step is saved, to the first
+refused field when a form is refused (with an alert saying to check the marked fields), and to the confirmation once
+the order is placed. Refusals are announced (`role="alert"`). ui-kit's `Field` does not tie its error text to the
+input (`aria-describedby`), which is the ui-kit's to add.
+
+The analytics events `ecommerce/add_shipping_info`, `ecommerce/add_payment_info` and `ecommerce/purchase` are tracked
+when the shipping method is set, when the order is placed and once it is placed. `add_payment_info` is sent once per
+order and method, not again on a retry after a decline. The order number goes only into the purchase, as its
+`orderId` (the transaction id); no event carries the shopper's name, email or address. `begin_checkout` stays with the
+cart sheet's Checkout button, as in ui-app, so a direct visit to the checkout page (a bookmark, the back button) sends
+none.
+
+Studio fields: the heading, the empty cart's heading, text and "Continue shopping" link, and the confirmation's
+heading and text (`{code}` and `{email}` are filled in). The default confirmation text promises no email — whether one
+is sent depends on the Vendure server's email plugin, which the storefront cannot see; a merchant whose server sends
+confirmations may say so in the field. Every empty field falls back to the section's own text in
+the page's language — English, German, French, Dutch, Spanish, Italian and Polish; English for any other.
+
+**Payment methods.** A method whose Vendure handler completes the payment inside `addPaymentToOrder` — the built-in
+dummy handler, an invoice or cash-on-delivery handler — is paid by the section with empty metadata. A method that
+needs a provider's own step in the browser (the Stripe or Mollie plugin's, any card form or redirect) cannot be paid
+by this section yet: name its code in `providerPaymentMethods` and the section lists it as "Cannot be paid on this
+page yet" and never sends it. The Shop API does not tell which handler a method uses, so the setting says it. A method
+Vendure answers as not eligible shows Vendure's eligibility message.
+
+**Not supported yet:** provider payment flows (above), choosing a saved address of a signed-in customer, entering a
+coupon in the checkout (the cart sheet takes coupons), splitting an order across several shipping methods, and a
+sign-in link (no canonical login page).
 
 ## What Vendure cannot do here
 
@@ -272,9 +362,13 @@ the operations that spread it. The orchestr handlers are in `src/runtime/server/
 to the canonical shapes in `src/runtime/server/mappers` (pure functions with unit tests), and every Vendure failure
 is translated in one place, `src/runtime/server/errors/mapVendureError.ts`.
 
-The playground is configured against Vendure's public read-only demo, which accepts carts and guest checkout but
-requires email verification for new accounts. Point it at another server with `VENDURE_SHOP_API_URL`,
-`VENDURE_CHANNEL_TOKEN` and `VENDURE_LANGUAGE_CODE`. The signed-in contract tests run with
+The playground is a small storefront configured against Vendure's public read-only demo, which accepts carts and
+guest checkout but requires email verification for new accounts. Its pages come from `playground/laioutrrc.example.json`
+— a home page with a product slider, a product detail page, the cart sheet in the header and `/checkout` with the
+checkout section; a git-ignored `playground/laioutrrc.json` takes its place when present. The example holds no
+secret. `pnpm dev:build` builds it and `node playground/.output/server/index.mjs` serves it. Point it at another server with `VENDURE_SHOP_API_URL`,
+`VENDURE_CHANNEL_TOKEN` and `VENDURE_LANGUAGE_CODE` (and the checkout settings with `VENDURE_CHECKOUT_PATH` and
+`VENDURE_PROVIDER_PAYMENT_METHODS`). The signed-in contract tests run with
 `VENDURE_CONTRACT_EMAIL` and `VENDURE_CONTRACT_PASSWORD` of a verified customer — on a local Vendure with
 verification off, a customer registered through `registerCustomerAccount` can sign in at once.
 
@@ -287,7 +381,7 @@ product feed's catalogue read to a running playground named by `VENDURE_CONTRACT
 
 ## Open
 
-1. A checkout section in the Laioutr UI, on the `vendure/checkout/*` actions.
+1. Provider payment flows in the checkout section (a card widget or redirect before `add-payment`).
 2. A connection test for the settings form — the manifest's test contract cannot name a host that a setting chooses
    (see [docs/gaps.md](docs/gaps.md)).
 3. Publishing to npmjs, once approved.

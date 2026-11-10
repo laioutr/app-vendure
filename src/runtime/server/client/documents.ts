@@ -572,6 +572,18 @@ export const TransitionOrderToStateMutation = /* GraphQL */ `
   }
 `;
 
+/** What decides whether a payment may be added now: the order's state and the payments it already has. */
+export const ActiveOrderPaymentStateQuery = /* GraphQL */ `
+  query ActiveOrderPaymentState {
+    activeOrder {
+      state
+      payments {
+        state
+      }
+    }
+  }
+`;
+
 export const AddPaymentToOrderMutation = /* GraphQL */ `
   mutation AddPaymentToOrder($input: PaymentInput!) {
     addPaymentToOrder(input: $input) {

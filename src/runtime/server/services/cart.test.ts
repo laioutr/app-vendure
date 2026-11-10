@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { addVariants, adjustLine, applyCoupon } from './cart';
+import { addVariants, adjustLine, applyCoupon, removeLine } from './cart';
 import { fakeShopApi } from '../../../../test/fixtures/fakeShopApi';
 import { product, variant } from '../../../../test/fixtures/vendure';
 import { VendureClient } from '../client/VendureClient';
@@ -17,6 +17,14 @@ const productsAnswer = ({ variables }: { variables?: Record<string, unknown> }) 
 
 const lines = (quantities: Record<string, number>) =>
   Object.entries(quantities).map(([id, quantity]) => ({ quantity, productVariant: { id } }));
+
+const fixedOrder = { __typename: 'OrderModificationError', errorCode: 'ORDER_MODIFICATION_ERROR', message: 'm' };
+const transitionRefused = {
+  __typename: 'OrderStateTransitionError',
+  errorCode: 'ORDER_STATE_TRANSITION_ERROR',
+  message: 'm',
+  transitionError: 'not allowed',
+};
 
 const rows = (count: number) =>
   Array.from({ length: count }, (_, index) => ({ productId: `${index + 1}`, variantId: `v${index + 1}`, quantity: 1 }));
@@ -152,11 +160,79 @@ describe('adjustLine', () => {
     });
     expect(await adjustLine(client('t'), 'l1', 5)).toEqual({ code: 'quantity-adjusted', level: 'warning' });
 
+    vi.spyOn(console, 'warn').mockImplementationOnce(() => {});
     fakeShopApi({
-      AdjustOrderLine: {
-        data: { adjustOrderLine: { __typename: 'OrderModificationError', errorCode: 'ORDER_MODIFICATION_ERROR', message: 'm' } },
-      },
+      AdjustOrderLine: { data: { adjustOrderLine: fixedOrder } },
+      TransitionOrderToState: { data: { transitionOrderToState: transitionRefused } },
     });
     await expect(adjustLine(client('t'), 'l1', 5)).rejects.toMatchObject({ data: { reason: 'order-not-modifiable' } });
+  });
+});
+
+describe('a cart edit while the order awaits payment', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** An order fixed for payment until it is moved back; the second answer is after the move. */
+  const awaitingPayment = (fixed: unknown, edited: unknown) => {
+    let reopened = false;
+    return {
+      reopened: () => reopened,
+      answer: () => (reopened ? edited : fixed),
+      reopen: ({ variables }: { variables?: Record<string, unknown> }) => {
+        reopened = variables?.state === 'AddingItems';
+        return { data: { transitionOrderToState: { __typename: 'Order' } } };
+      },
+    };
+  };
+
+  it('reopens the order once and changes the line', async () => {
+    const order = awaitingPayment(fixedOrder, { __typename: 'Order' });
+    const api = fakeShopApi({
+      AdjustOrderLine: () => ({ data: { adjustOrderLine: order.answer() } }),
+      TransitionOrderToState: order.reopen,
+    });
+    expect(await adjustLine(client('t'), 'l1', 3)).toBeUndefined();
+    expect(api.operations()).toEqual(['AdjustOrderLine', 'TransitionOrderToState', 'AdjustOrderLine']);
+  });
+
+  it('reopens the order once and removes the line', async () => {
+    const order = awaitingPayment(fixedOrder, { __typename: 'Order', id: 'o1' });
+    const api = fakeShopApi({
+      RemoveOrderLine: () => ({ data: { removeOrderLine: order.answer() } }),
+      TransitionOrderToState: order.reopen,
+    });
+    await removeLine(client('t'), 'l1');
+    expect(api.operations()).toEqual(['RemoveOrderLine', 'TransitionOrderToState', 'RemoveOrderLine']);
+  });
+
+  it('reopens the order once and adds the rows Vendure refused as fixed', async () => {
+    const added = { order: { lines: lines({ v1: 1 }) }, errorResults: [] };
+    const refused = { order: { lines: [] }, errorResults: [fixedOrder] };
+    const order = awaitingPayment(refused, added);
+    const api = fakeShopApi({
+      ProductsByIds: productsAnswer,
+      ActiveOrderQuantities: { data: { activeOrder: { lines: [] } } },
+      AddItemsToOrder: () => ({ data: { addItemsToOrder: order.answer() } }),
+      TransitionOrderToState: order.reopen,
+    });
+    const [outcome] = await addVariants(client('t'), client(), rows(1));
+    expect(outcome!.item.status).toBe('added');
+    expect(api.operations()).toEqual([
+      'ProductsByIds',
+      'ActiveOrderQuantities',
+      'AddItemsToOrder',
+      'TransitionOrderToState',
+      'AddItemsToOrder',
+    ]);
+  });
+
+  it('answers the refusal when the order cannot be moved back, without trying again', async () => {
+    vi.spyOn(console, 'warn').mockImplementationOnce(() => {});
+    const api = fakeShopApi({
+      RemoveOrderLine: { data: { removeOrderLine: fixedOrder } },
+      TransitionOrderToState: { data: { transitionOrderToState: transitionRefused } },
+    });
+    await expect(removeLine(client('t'), 'l1')).rejects.toMatchObject({ data: { reason: 'order-not-modifiable' } });
+    expect(api.operations()).toEqual(['RemoveOrderLine', 'TransitionOrderToState']);
   });
 });

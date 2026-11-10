@@ -217,5 +217,9 @@ export const variantComponents = (variant: Variant, product: Pick<Product, 'feat
     prices: () => variantPrices(variant),
     options: () => ({ selected: variantOptions(variant) }),
     quantityRule: () => ({ min: 1, increment: 1 }),
+    // Vendure core has no tiered prices, and its shipping is priced per order, not per variant: every
+    // order takes a shipping method, and its price is known only once the order has an address.
+    quantityPrices: () => [],
+    shipping: () => ({ required: true }),
   };
 };

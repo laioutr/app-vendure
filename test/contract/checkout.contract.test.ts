@@ -34,7 +34,7 @@ describe('guest checkout against the Shop API', () => {
     await setShippingAddress(shopper.client(), address);
     await setBillingAddress(shopper.client(), address);
 
-    const state = await getCheckoutState(shopper.client(), 'USD');
+    const state = await getCheckoutState(shopper.client(), 'USD', []);
     expect(state.order?.shippingAddress).toMatchObject({ city: 'Berlin', countryCode: 'DE' });
     expect(state.shippingMethods.length).toBeGreaterThan(0);
     expect(state.paymentMethods.length).toBeGreaterThan(0);
@@ -43,9 +43,12 @@ describe('guest checkout against the Shop API', () => {
     await setShippingMethod(shopper.client(), [state.shippingMethods[0]!.id]);
     expect(await transitionOrder(shopper.client(), 'ArrangingPayment')).toEqual({ state: 'ArrangingPayment' });
 
-    const payment = await addPayment(shopper.client(), state.paymentMethods.find((method) => method.isEligible)!.code, {});
+    const method = state.paymentMethods.find((each) => each.isEligible)!.code;
+    const payment = await addPayment(shopper.client(), method, {}, []);
     // The demo's only method, `standard-payment`, authorizes at once.
     expect(['PaymentAuthorized', 'PaymentSettled']).toContain(payment.state);
+    // A repeated Place order never reaches the payment handler again: the placed order is no longer the active one.
+    await expect(addPayment(shopper.client(), method, {}, [])).rejects.toBeInstanceOf(VendureOrderError);
 
     const { order } = await orderByCode(shopper.client(), payment.code, true);
     expect(order.code).toBe(payment.code);

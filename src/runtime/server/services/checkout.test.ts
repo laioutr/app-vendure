@@ -51,7 +51,7 @@ describe('checkout steps', () => {
 
   it('asks nothing for a visitor without a session', async () => {
     const api = fakeShopApi({});
-    expect(await getCheckoutState(client(), 'USD')).toMatchObject({ order: null, shippingMethods: [] });
+    expect(await getCheckoutState(client(), 'USD', [])).toMatchObject({ order: null, shippingMethods: [] });
     expect(api.calls).toHaveLength(0);
   });
 
@@ -77,24 +77,58 @@ describe('checkout steps', () => {
     expect(await transitionOrder(client('t'), 'ArrangingPayment')).toEqual({ state: 'ArrangingPayment' });
   });
 
-  it("answers the placed order's code, and a declined payment as its reason", async () => {
-    fakeShopApi({ AddPaymentToOrder: { data: { addPaymentToOrder: { __typename: 'Order', code: 'C1', state: 'PaymentAuthorized' } } } });
-    expect(await addPayment(client('t'), 'card', undefined)).toEqual({ code: 'C1', state: 'PaymentAuthorized' });
-
-    fakeShopApi({
-      AddPaymentToOrder: {
-        data: {
-          addPaymentToOrder: {
-            __typename: 'PaymentDeclinedError',
-            errorCode: 'PAYMENT_DECLINED_ERROR',
-            message: 'm',
-            paymentErrorMessage: 'card declined',
-          },
-        },
+  const awaitingPayment = { data: { activeOrder: { state: 'ArrangingPayment', payments: [] } } };
+  const placedAnswer = { data: { addPaymentToOrder: { __typename: 'Order', code: 'C1', state: 'PaymentAuthorized' } } };
+  const declinedAnswer = {
+    data: {
+      addPaymentToOrder: {
+        __typename: 'PaymentDeclinedError',
+        errorCode: 'PAYMENT_DECLINED_ERROR',
+        message: 'm',
+        paymentErrorMessage: 'card declined',
       },
+    },
+  };
+
+  it("answers the placed order's code", async () => {
+    fakeShopApi({ ActiveOrderPaymentState: awaitingPayment, AddPaymentToOrder: placedAnswer });
+    expect(await addPayment(client('t'), 'card', undefined, [])).toEqual({ code: 'C1', state: 'PaymentAuthorized' });
+  });
+
+  it('puts the order back to adding items when the payment is declined, and answers the reason', async () => {
+    const api = fakeShopApi({
+      ActiveOrderPaymentState: awaitingPayment,
+      AddPaymentToOrder: declinedAnswer,
+      TransitionOrderToState: { data: { transitionOrderToState: { __typename: 'Order' } } },
     });
-    const declined = await addPayment(client('t'), 'card', {}).catch((error: unknown) => error);
+    const declined = await addPayment(client('t'), 'card', {}, []).catch((error: unknown) => error);
     expect(declined).toBeInstanceOf(VendureOrderError);
     expect(declined).toMatchObject({ data: { reason: 'payment-declined' } });
+    expect(api.operations()).toEqual(['ActiveOrderPaymentState', 'AddPaymentToOrder', 'TransitionOrderToState']);
+    expect(api.calls.at(-1)?.variables).toEqual({ state: 'AddingItems' });
+  });
+
+  it('refuses a second payment, and an order not awaiting payment, without reaching the payment handler', async () => {
+    for (const activeOrder of [
+      { state: 'ArrangingPayment', payments: [{ state: 'Declined' }, { state: 'Authorized' }] },
+      { state: 'ArrangingPayment', payments: [{ state: 'Settled' }] },
+      { state: 'AddingItems', payments: [] },
+    ]) {
+      const api = fakeShopApi({ ActiveOrderPaymentState: { data: { activeOrder } } });
+      await expect(addPayment(client('t'), 'card', undefined, [])).rejects.toMatchObject({
+        data: { reason: 'order-not-awaiting-payment' },
+      });
+      expect(api.operations()).toEqual(['ActiveOrderPaymentState']);
+    }
+    fakeShopApi({ ActiveOrderPaymentState: { data: { activeOrder: null } } });
+    await expect(addPayment(client('t'), 'card', undefined, [])).rejects.toMatchObject({ data: { reason: 'no-active-order' } });
+  });
+
+  it("refuses a method paid in a provider's own flow without asking Vendure", async () => {
+    const api = fakeShopApi({});
+    await expect(addPayment(client('t'), 'stripe', undefined, ['stripe'])).rejects.toMatchObject({
+      data: { reason: 'payment-method-not-eligible' },
+    });
+    expect(api.calls).toHaveLength(0);
   });
 });

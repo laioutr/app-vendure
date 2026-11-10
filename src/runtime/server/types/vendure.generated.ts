@@ -3999,6 +3999,11 @@ export type TransitionOrderToStateMutation = { __typename?: 'Mutation', transiti
     | { __typename: 'OrderStateTransitionError', transitionError: string, errorCode: ErrorCode, message: string }
    | null };
 
+export type ActiveOrderPaymentStateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ActiveOrderPaymentStateQuery = { __typename?: 'Query', activeOrder: { __typename?: 'Order', state: string, payments: Array<{ __typename?: 'Payment', state: string }> | null } | null };
+
 export type AddPaymentToOrderMutationVariables = Exact<{
   input: PaymentInput;
 }>;

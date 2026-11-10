@@ -71,6 +71,7 @@ export const operations = {
   setOrderBillingAddress: op<T.SetOrderBillingAddressMutation, T.SetOrderBillingAddressMutationVariables>(D.SetOrderBillingAddressMutation),
   setOrderShippingMethod: op<T.SetOrderShippingMethodMutation, T.SetOrderShippingMethodMutationVariables>(D.SetOrderShippingMethodMutation),
   transitionOrderToState: op<T.TransitionOrderToStateMutation, T.TransitionOrderToStateMutationVariables>(D.TransitionOrderToStateMutation),
+  activeOrderPaymentState: op<T.ActiveOrderPaymentStateQuery>(D.ActiveOrderPaymentStateQuery),
   addPaymentToOrder: op<T.AddPaymentToOrderMutation, T.AddPaymentToOrderMutationVariables>(D.AddPaymentToOrderMutation),
   orderByCode: op<T.OrderByCodeQuery, T.OrderByCodeQueryVariables>(D.OrderByCodeQuery),
 

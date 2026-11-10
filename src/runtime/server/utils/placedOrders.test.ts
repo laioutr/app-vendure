@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { placedOrdersSecret, readPlacedOrders, withPlacedOrder } from './placedOrders';
+import { placedOrdersSecret, placedOrderToShow, readPlacedOrders, withPlacedOrder } from './placedOrders';
 
 describe('placed orders', () => {
   it('reads back what it signed, and nothing signed with another key', () => {
@@ -20,5 +20,12 @@ describe('placed orders', () => {
     expect(placedOrdersSecret('project')).toBe('project');
     expect(placedOrdersSecret('')).toBe(placedOrdersSecret(false));
     expect(placedOrdersSecret(undefined)).not.toBe('');
+  });
+
+  it('shows the code asked for, else the newest placed here, and says whether this browser placed it', () => {
+    expect(placedOrderToShow(undefined, ['A', 'B'])).toEqual({ code: 'B', placedHere: true });
+    expect(placedOrderToShow('A', ['A', 'B'])).toEqual({ code: 'A', placedHere: true });
+    expect(placedOrderToShow('X', ['A'])).toEqual({ code: 'X', placedHere: false });
+    expect(placedOrderToShow(undefined, [])).toBeUndefined();
   });
 });

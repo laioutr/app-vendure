@@ -8,6 +8,16 @@ First version: a Laioutr app that connects a storefront to a Vendure shop throug
   sortings, suggested search, the menu from the collection tree, page indexes and Studio query templates.
 - Cart: the active order, adding, changing and removing lines, coupon codes.
 - Checkout: the app's own `vendure/checkout/*` actions — customer, addresses, shipping method, payment, order by code.
+- The `VendureCheckout` section (with `@laioutr-app/ui`): contact, address, delivery, payment and the confirmation on
+  one page; the cart's Checkout button leads to it through the `checkoutPath` setting. Methods paid in a provider's own
+  flow are named in `providerPaymentMethods`, shown as not payable on the page and refused by `add-payment`; with no
+  payable method the step says so. Place order and every step are sent once while on their way; `add-payment` refuses
+  an order that already holds an authorized or settled payment. A declined payment moves the order back to
+  `AddingItems`, and a cart change on an order awaiting payment reopens it once. The section follows cart changes made
+  elsewhere on the page and empties the header's cart once the order is placed; the summary lists every promotion;
+  the confirmation survives a reload without the order number in the address; focus and alerts follow the steps.
+- The standard product detail page and cart sheet render: variants answer `quantityPrices` and `shipping`, cart lines
+  `productData`.
 - Accounts: password sign-in, sign-out, registration, email confirmation, password recovery and reset, profile,
   email and password changes, address book.
 - Orders: order history, order detail with lines, reorder, monthly statistics.

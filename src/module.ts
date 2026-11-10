@@ -1,6 +1,8 @@
 /* eslint-disable import-x/export, @typescript-eslint/no-empty-object-type */
-import { createResolver, defineNuxtModule, installModule } from '@nuxt/kit';
+import { createResolver, defineNuxtModule, installModule, logger, tryResolveModule } from '@nuxt/kit';
 import { defu } from 'defu';
+import { installsModule } from './installedModules';
+import { DEFAULT_CHECKOUT_PATH } from './runtime/shared/checkoutPath';
 import { registerLaioutrApp } from '@laioutr-core/kit';
 import type { NuxtModule } from '@nuxt/schema';
 import { name, version } from '../package.json';
@@ -26,6 +28,17 @@ export interface ModuleOptions {
   adminApiUrl?: string;
   /** An Admin API key of a role with the permissions the README lists. */
   adminApiKey?: string;
+  /**
+   * The storefront page holding the `VendureCheckout` section, where the cart's Checkout button
+   * leads. A path on the storefront's domain or a full URL; `/checkout` when unset.
+   */
+  checkoutPath?: string;
+  /**
+   * Codes of the shop's payment methods that are paid in a provider's own flow (a card widget, a
+   * redirect), comma-separated. The checkout section cannot run such a flow and shows them as not
+   * available.
+   */
+  providerPaymentMethods?: string;
 }
 
 /**
@@ -41,6 +54,8 @@ export interface RuntimeConfigModulePublic {}
  */
 export interface RuntimeConfigModulePrivate extends ModuleOptions {}
 
+const STOREFRONT_UI = '@laioutr-app/ui';
+
 const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
   meta: {
     name,
@@ -49,6 +64,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
   },
   defaults: {
     shopApiUrl: '',
+    checkoutPath: DEFAULT_CHECKOUT_PATH,
   },
   async setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url);
@@ -69,9 +85,20 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     // offered, rather than offered and failing on every call.
     const hasAdminApi = !!(options.adminApiUrl && options.adminApiKey);
 
+    // The checkout section is built from the storefront UI's components, so it is offered only where
+    // the storefront installs them as a module; without, the cart's link still leads to the setting's page.
+    const laioutrrcApps = (nuxt.options as { laioutr?: { laioutrrc?: { apps?: { name: string }[] } } }).laioutr?.laioutrrc?.apps;
+    // On prepare this module installs it itself, below.
+    const hasStorefrontUi =
+      (!!nuxt.options._prepare || (await installsModule(STOREFRONT_UI, nuxt.options.modules, laioutrrcApps))) &&
+      !!(await tryResolveModule(STOREFRONT_UI, nuxt.options.modulesDir));
+    if (!hasStorefrontUi)
+      logger.warn(`[${name}] ${STOREFRONT_UI} is not installed as a module, so the VendureCheckout section is not offered.`);
+
     await registerLaioutrApp({
       name,
       version,
+      sections: hasStorefrontUi ? [resolveRuntimeModule('app/sections')] : [],
       orchestrDirs: [
         resolveRuntimeModule('server/orchestr'),
         ...(hasAdminApi ? [resolveRuntimeModule('server/admin/source-entities')] : []),
@@ -88,7 +115,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     // Peer modules are installed on prepare only, so `#imports` resolves for the typecheck; a
     // storefront lists them itself, as the playground does.
     if (nuxt.options._prepare) {
-      for (const peer of ['@laioutr-core/frontend-core', '@laioutr-core/orchestr', '@nuxt/image']) await installModule(peer);
+      for (const peer of ['@laioutr-core/frontend-core', '@laioutr-core/orchestr', '@nuxt/image', STOREFRONT_UI]) await installModule(peer);
     }
   },
 });

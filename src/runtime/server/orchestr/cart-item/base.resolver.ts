@@ -1,4 +1,10 @@
-import { CartItemAvailability, CartItemBase, CartItemCost, CartItemQuantityRule } from '@laioutr-core/canonical-types/entity/cart-item';
+import {
+  CartItemAvailability,
+  CartItemBase,
+  CartItemCost,
+  CartItemProductData,
+  CartItemQuantityRule,
+} from '@laioutr-core/canonical-types/entity/cart-item';
 import { cartCouponComponents, cartLineComponents, couponCodeOfItemId } from '../../mappers/order';
 import { defineVendureComponentResolver } from '../../middleware/defineVendure';
 import { activeOrderFor } from '../../utils/activeOrder';
@@ -6,7 +12,7 @@ import { activeOrderFor } from '../../utils/activeOrder';
 export default defineVendureComponentResolver({
   entityType: 'CartItem',
   label: 'Vendure Cart Item Resolver',
-  provides: [CartItemBase, CartItemCost, CartItemAvailability, CartItemQuantityRule],
+  provides: [CartItemBase, CartItemCost, CartItemAvailability, CartItemQuantityRule, CartItemProductData],
   cache: false,
   resolve: async ({ entityIds, context, passthrough, $entity }) => {
     const order = await activeOrderFor(context.vendureClient, passthrough);
@@ -27,6 +33,7 @@ export default defineVendureComponentResolver({
           cost: () => components.cost,
           availability: () => components.availability,
           quantityRule: () => components.quantityRule,
+          productData: () => components.productData,
         }),
       ];
     });

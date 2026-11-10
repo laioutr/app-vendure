@@ -11,6 +11,8 @@ import {
 } from './order';
 import { order, orderLine } from '../../../../test/fixtures/vendure';
 
+const checkout = { type: 'url' as const, href: '/checkout' };
+
 describe('cart', () => {
   it('lists lines, then coupons under their own prefix', () => {
     const ids = cartItemIds(order({ couponCodes: ['SAVE10'] }));
@@ -20,8 +22,8 @@ describe('cart', () => {
   });
 
   it('costs with tax; the total is an estimate until there is a shipping address', () => {
-    const { base, cost } = cartComponents(order());
-    expect(base).toEqual({ totalQuantity: 2 });
+    const { base, cost } = cartComponents(order(), checkout);
+    expect(base).toEqual({ totalQuantity: 2, checkoutLink: checkout });
     expect(cost).toMatchObject({
       subtotal: { amount: 2142, currency: 'EUR' },
       total: { amount: 2737, currency: 'EUR' },
@@ -44,7 +46,8 @@ describe('cart', () => {
             phoneNumber: null,
           },
           shippingLines: [{ id: 's', priceWithTax: 595, shippingMethod: { id: '1', code: 'std', name: 'Standard' } }],
-        })
+        }),
+        checkout
       ).cost
     ).toMatchObject({
       totalIsEstimated: false,
@@ -54,10 +57,10 @@ describe('cart', () => {
 
   it('pairs a discount with the code only when one code is applied', () => {
     const discounts = [{ adjustmentSource: 'P', type: 'PROMOTION' as const, description: '10%', amount: -100, amountWithTax: -119 }];
-    expect(cartComponents(order({ discounts, couponCodes: ['A'] })).cost.discounts).toEqual([
+    expect(cartComponents(order({ discounts, couponCodes: ['A'] }), checkout).cost.discounts).toEqual([
       { name: '10%', code: 'A', amount: { amount: 119, currency: 'EUR' } },
     ]);
-    expect(cartComponents(order({ discounts, couponCodes: ['A', 'B'] })).cost.discounts![0]!.code).toBeUndefined();
+    expect(cartComponents(order({ discounts, couponCodes: ['A', 'B'] }), checkout).cost.discounts![0]!.code).toBeUndefined();
   });
 
   it('maps a line with its options, link and discounted total', () => {
@@ -70,6 +73,9 @@ describe('cart', () => {
       total: { amount: 2142, currency: 'EUR' },
     });
     expect(line.availability).toEqual({ status: 'inStock', quantity: 0 });
+    // The cart asks for product data on every line; Vendure has no unit price to put in it.
+    expect(line.productData).toEqual({});
+    expect(cartCouponComponents('SAVE10', 'EUR').productData).toEqual({});
   });
 
   it('shows a coupon as a fixed line', () => {
